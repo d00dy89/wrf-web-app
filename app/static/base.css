@@ -1,0 +1,17 @@
+body {
+background-color: rgb(228, 237, 232);
+}
+
+.header {
+font-size: 40px;
+}
+
+.sidebar {
+  width: 15%;
+  display: block;
+}
+
+.plot-form li {
+  display: inline-block;
+  padding: 10px 20px;
+}

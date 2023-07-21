@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="summary">
+    <p>Welcome to Summary Page</p>
+    <lu>
+        {% for key, val in current_file_summary.items() %}
+        <li>{{ key }}: {{ val }}</li>
+        <br>
+        {% endfor %}
+    </lu>
+</div>
+<a href="{{ url_for('map_bp.create_map', selected_file=selected_file) }}">Map file</a>
+{% endblock %}

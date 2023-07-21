@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <title>WRF-Online</title>
+  <style>
+    body {
+    background-color: rgb(228, 237, 232);
+    }
+
+    .header {
+    font-size: 40px;
+    }
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0,0.4);
+}
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+
+}
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+  </style>
+
+</head>
+  <body>
+  <!-- The Modal -->
+<div id="myModal" class="modal" style="display:none">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+
+    <p>Verileriniz indiriliyor. Lütfen bekleyiniz.</p>
+  </div>
+
+</div>
+  <div style="text-align:center; color: white;background-color:rgb(22,8,90);">
+   <p class="header" > WRF-Online</p>
+  </div>
+    <form method="post" action="{{ url_for('run_wrf_bp.run_wrf') }}" >
+      <center>
+        <h2>1)   GFS (0.5) verileri indirilir ve ungrib programı çalıştırılır.</h2>
+        <br>
+        <br>
+        <br>
+        <table>
+          <tbody>
+
+            <tr>
+                Simülasyon Başlangıç Tarihi &nbsp &nbsp &nbsp &nbsp
+                <input type="date"
+                                             id="start_date"
+                                             name="start_date"
+                       min="2021-12-01"
+                       max="2100-10-16"
+                                             value="2023-07-20">(aa-gg-yyyy) &nbsp &nbsp</tr>
+            <br>
+            <hr>
+            <br>
+            <tr>
+              Simülasyon Başlangıç Saati &nbsp &nbsp &nbsp
+
+              <input type="radio" id="gfsBaslangicSaati1" name="gfsBaslangicSaati" value="00">
+              <label for="gfsBaslangicSaati1">00 &nbsp</label>
+              <input type="radio" id="gfsBaslangicSaati2" name="gfsBaslangicSaati" value="06">
+              <label for="gfsBaslangicSaati2">06 &nbsp</label>
+              <input type="radio" id="gfsBaslangicSaati3" name="gfsBaslangicSaati" value="12">
+              <label for="gfsBaslangicSaati3">12 &nbsp</label>
+              <input type="radio" id="gfsBaslangicSaati4" name="gfsBaslangicSaati" value="18">
+              <label for="gfsBaslangicSaati4">18 &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</label>
+            </tr>
+              <br>
+            <hr>
+            <br>
+            <tr>Simülasyon Bitiş Tarihi  &nbsp &nbsp &nbsp &nbsp &nbsp
+                <input type="date"
+                                          id="end_date"
+                                          name="end_date"
+                       min="2021-12-01"
+                       max="2100-10-16"
+                                          value="2023-07-20"> (aa-gg-yyyy) </tr>
+            <br>
+            <hr>
+            <tr>
+             &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Simülasyon Bitiş Saati &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
+              <input type="radio" id="gfsBitisSaati1" name="gfsBitisSaati" value="00">
+              <label for="gfsBitisSaati1">00 &nbsp</label>
+              <input type="radio" id="gfsBitisSaati2" name="gfsBitisSaati" value="03">
+              <label for="gfsBitisSaati2">03 &nbsp</label>
+              <input type="radio" id="gfsBitisSaati3" name="gfsBitisSaati" value="06">
+              <label for="gfsBitisSaati3">06 &nbsp</label>
+              <input type="radio" id="gfsBitisSaati4" name="gfsBitisSaati" value="09">
+              <label for="gfsBitisSaati4">09 &nbsp</label>
+              <input type="radio" id="gfsBitisSaati5" name="gfsBitisSaati" value="12">
+              <label for="gfsBitisSaati5">12 &nbsp</label>
+              <input type="radio" id="gfsBitisSaati6" name="gfsBitisSaati" value="15">
+              <label for="gfsBitisSaati6">15 &nbsp</label>
+              <input type="radio" id="gfsBitisSaati7" name="gfsBitisSaati" value="18">
+              <label for="gfsBitisSaati7">18 &nbsp</label>
+              <input type="radio" id="gfsBitisSaati8" name="gfsBitisSaati" value="21">
+              <label for="gfsBitisSaati8">21 &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</label>
+            </tr>
+            <br>
+            <hr>
+            <br>
+            <tr>Zaman Aralığı &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp<input type="text"
+                                                    id="interval_seconds"
+                                                    name="interval_seconds"
+                                                    value="3"> saat </tr>
+            <br>
+            <hr>
+            <br>
+             <tr><input style="background-color:#7d7688; cursor:pointer;" value="ungrib.exe Programını Çalıştır" type="submit"
+                                                name="ungrib.exe"
+                                                id="ungrib.exe"
+             onclick="var modal = document.getElementById('myModal');modal.style.display = 'block';"></tr>
+            <br>
+            <br>
+            <hr>
+            <br>
+            <p> NOT: Başlangıç ve sınır koşulu olarak NCEP/GFS modelinin çıktıları kullanılmaktadır. 0.5 derece çözünürlükteki GFS verilerinin sahip olduğu en
+              yüksek zaman frekansı 3 saattir. </p>
+
+          <p> <em> NOT: Başlangıç ve bitiş saatlerinin UTC olarak girilmesi gerektiğini unutmayın.</em></p>
+          </tbody>
+        </table>
+      </center>
+    </form>
+  <footer>
+  <div align="center"><img style="width:10%;padding-top:5%;" src=" {{ url_for('run_wrf_bp.static', filename='itulogo.png') }}" alt="logo"></div>
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% from "helpers/form_helpers.html" import render_field %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('.index') }}">
+  {{ form.csrf_token }}
+  <dl>
+    {{ render_field(form.selected_file) }}
+  </dl>
+  <p><input type=submit value=Commit>
+</form>
+{% endblock %}

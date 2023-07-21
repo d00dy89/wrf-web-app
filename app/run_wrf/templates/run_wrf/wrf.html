@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WRF-Online</title>
+  <style>
+    body {
+    background-color: rgb(228, 237, 232)
+    }
+
+    .header {
+    font-size: 40px;
+    }
+  </style>
+
+</head>
+  <body>
+  <div style="text-align:center; color: white;background-color:rgb(22,8,90);">
+   <p class="header" > WRF-Online</p>
+  </div>
+    <form method="post" action="{{ url_for('run_wrf_bp.wrf') }}">
+      <center>
+        <h2> 4) Modeli çalıştırın. </h2>
+        <table>
+
+          <tbody>
+          <hr>
+          <tr>
+
+              <h4>Mikrofizik Süreci Seçin</h4>
+              <input type="radio" id="Kessler" name="microphy" value="1">
+              <label for="Kessler">Kessler &nbsp</label> <br> <br>
+              <input type="radio" id="WSM3" name="microphy" value="3">
+              <label for="WSM3">WSM3 &nbsp</label><br><br>
+              <input type="radio" id="Ferrier" name="microphy" value="5">
+              <label for="Ferrier"> Ferrier &nbsp</label><br><br>
+              <input type="radio" id="WSM5" name="microphy" value="4">
+              <label for="WSM5">WSM5 &nbsp</label><br><br>
+              <input type="radio" id="Lin" name="microphy" value="2">
+              <label for="Lin">Lin &nbsp</label><br><br>
+              <input type="radio" id="WSM6" name="microphy" value="6">
+              <label for="WSM6">WSM6  &nbsp</label>
+            </tr><br> <hr>
+
+          <tr><h4>Atmosferik Sınır Tabakası Seçiniz</h4><br><select name="pbl">
+                <option value="1">YSU</option>
+                <option value="2">MYJ</option>
+                <option value="6">MYNN3</option>
+                <option value="4">QNSE-EDMF</option>
+                <option value="5">MYNN2</option>
+                <option value="6">MYNN3</option>
+                <option value="7">ACM2</option>
+          </select></tr> <br> <hr>
+
+          <tr><h4>Kümülüs Parametrizasyonu Seçiniz </h4><br><select name="cumulus">
+                    <option value="1">Kain–Fritsch Scheme</option>
+                    <option value="2">Betts-Miller-Janjic</option>
+                    <option value="3">Grell-Freitas</option>
+                    <option value="4">Old Simplied Arakawa-Schubert</option>
+                    <option value="5">Grell-3</option>
+                    <option value="6">Tiedtke</option>
+          </select></tr> <br> <hr>
+          <tr><h4>Kaç Çekirdek ile Paralel Çalışacağını Seçiniz </h4><br><select name="core">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+          </select></tr> <br> <hr>
+
+
+
+
+            <br>
+            <br>
+            <br>
+             <tr><input value="Modeli Çalıştır" type="submit"
+                                                name="modelrun"
+                                                id="modelrun" ></tr>
+          </tbody>
+        </table>
+
+
+      </center>
+
+
+
+
+    </form>
+  </body>
+</html>
