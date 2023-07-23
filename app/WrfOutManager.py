@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import wrf
 
 from netCDF4 import Dataset
@@ -46,6 +48,12 @@ class WrfOutManager(metaclass=Singleton):
 
     def load_base_variables(self) -> None:
         self._data.load_base_variables()
+
+    def get_figure_size(self) -> Tuple[float, float]:
+        # TODO: calculate from x, y grid count and dx, dy
+        x = self._data.x_grid_count
+        y = self._data.y_grid_count
+        return x / 10, y / 10
 
     def get_available_times(self):
         return self._data.extract_all_times()

@@ -1,8 +1,11 @@
 import os
 import subprocess
 
-import requests
+from glob import glob
 from pathlib import Path
+
+import requests
+
 from flask import current_app
 
 from path_config import PathConfig
@@ -116,21 +119,27 @@ def plot_domain():
     run_bp_static_folder = path_config.APP_FOLDER_PATH.joinpath("run_wrf/static")
     ncl_script_path = path_config.LIBRARY_FOLDER_PATH.joinpath("plotgrids_new_to_png.ncl")
     namelist_wps_file_path = WPS_FOLDER_PATH.joinpath("namelist.wps")
-    fname_arg = "'wpsFilePath=\"{}\"'".format(namelist_wps_file_path.as_posix())
-    cmd = f"ncl -pQ {fname_arg} {ncl_script_path.as_posix()}"
+
+    print("Plotting domain with NCL.")
+    process = subprocess.Popen(["ncl", "-pQ", ncl_script_path.as_posix()],
+                               cwd=run_bp_static_folder.as_posix(),
+                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     try:
         # TODO: maybe fix this
         #  ncl subprocess gets stuck and never returns to give it a timeout
         #  and catch the error instead of waiting forever it to return.
-        result = subprocess.run([cmd], shell=True, cwd=run_bp_static_folder.as_posix(), timeout=3,
-                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        # TODO (BUG): timeout doesnt kill the child process
+        # result = subprocess.run([cmd], shell=True, cwd=run_bp_static_folder.as_posix(), timeout=3,
+        #                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        outs = process.communicate(timeout=3)
     except subprocess.TimeoutExpired as error:
-        pass
+        process.kill()
+        outs = process.communicate()
 
-    print("Plotted domain grids.")
+    print(f"-- Ncl plot domain --\noutput:{outs}")
 
 
-def run_real_exe():
+def run_real_exe() -> bool:
     em_real_exe_file_path = WRF_FOLDER_PATH.joinpath('test/em_real/real.exe')
     cmd_real_run = subprocess.run(
         ["./real.exe"],
@@ -145,20 +154,55 @@ def run_real_exe():
         result = result.strip(real_exe_success_output)
     except Exception as e:
         print(f"Exception occurred stripping real.exe output, details:\n{e}")
-
     finally:
         if len(result) > 0:
             print(f"Something wrong with real.exe, details:\n{result}")
+            return False
         else:
-            print(result_success_message)
+            return True
 
 
-def run_wrf_exe(log_file_name: str):
-    wrf_run_log_file_path = path_config.LOGS_FOLDER.joinpath(log_file_name)
-    log_file = open(wrf_run_log_file_path, "w")
-    cmd_run_wrf = subprocess.Popen(
-        ["mpirun", "-np", "2", "./wrf.exe"],
+def run_wrf_exe(log_file_name: str, core_count: int) -> bool:
+    # wrf_run_log_file_path = path_config.LOGS_FOLDER.joinpath(log_file_name)
+    # log_file = open(wrf_run_log_file_path, "w")
+    # TODO: add rsl.error to logs
+    print(f"Running wrf.exe with core count: {core_count}")
+    run_wrf_process = subprocess.Popen(
+        ["mpirun", "-np", str(core_count), "./wrf.exe"],
         cwd=WRF_RUN_FOLDER_PATH.as_posix(),
-        stdout=log_file, stderr=subprocess.STDOUT
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT
     )
-    return cmd_run_wrf
+    run_success = False
+    try:
+        out = run_wrf_process.communicate()
+        print(f"wrf.exe completed with output: {out}")
+        run_success = True
+    except Exception as e:
+        print(f"Exception occurred details:\n{e}")
+
+    finally:
+        return run_success
+
+
+def move_wrf_outs():
+    # This is with single loop
+    # for wrfout in glob(str(WRF_RUN_FOLDER_PATH.joinpath("wrfout_*"))):
+    #     wrfout_src_path = Path(wrfout)
+    #     new_wrfout_path = path_config.WRF_OUTPUT_FOLDER_PATH.joinpath(wrfout_src_path.name)
+    #     try:
+    #         wrfout_src_path.rename(new_wrfout_path)
+    #         print(f"Moved from: {wrfout_src_path=} To {new_wrfout_path=}")
+    #     except Exception as e:
+    #         print(f'Exception occurred while moving wrfout file, details: \n{e}')
+
+    wrf_out_paths = [Path(wrfout) for wrfout in glob(str(WRF_RUN_FOLDER_PATH.joinpath("wrfout_*")))]
+    new_wrf_out_paths = [path_config.WRF_OUTPUT_FOLDER_PATH.joinpath(path.name) for path in wrf_out_paths]
+    # TODO: check params
+    try:
+        for src, target in zip(wrf_out_paths, new_wrf_out_paths):
+            src.rename(target)
+            print(f"Moved from: {src=} To {target=}")
+        # print("Moved wrfout files to app data directory.")
+    except Exception as e:
+        print(f'Exception occurred while moving wrfout files, details: \n{e}')
+

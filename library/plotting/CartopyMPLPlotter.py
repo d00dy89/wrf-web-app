@@ -39,7 +39,7 @@ class CartopyMplPlotter:
         self.lons = None
 
     def create_figure(self, **mpl_fig_kwargs) -> None:
-        self._figure = plt.figure(**mpl_fig_kwargs)
+        self._figure = plt.figure(figsize=self.data_manager.get_figure_size(), **mpl_fig_kwargs)
 
         projection_data = self.data_manager.extract_projection_and_bounds()
         self._ax = plt.axes(projection=projection_data["projection"])

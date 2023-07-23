@@ -3,7 +3,7 @@ from flask import render_template, request, redirect, url_for, current_app, sess
 from app import FlaskApp
 from app.WrfOutManager import WrfOutManager
 from app.file_selection import file_selection_bp
-from app.post_process.forms import SelectFileForm
+from app.file_selection.forms import SelectFileForm
 
 current_app: FlaskApp
 

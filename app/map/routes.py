@@ -49,7 +49,8 @@ def create_map(selected_file: str) -> str:
     colour_fill_data = form.colour_fill_data.data
 
     wrf_manager.load_base_variables()
-    plotter.create_figure(figsize=(9, 9))
+
+    plotter.create_figure()
 
     if should_plot_slp:
         print("plotting slp")
@@ -59,16 +60,6 @@ def create_map(selected_file: str) -> str:
         plotter.plot_wind(time_step=time_step, grid_interval=10)
 
     plotter.plot_contour_fill(data_key=colour_fill_data, timeidx=time_step)
-
-        # image_src = plotter.save()
-        # wrf_manager.close_dataset()
-        # return render_template(
-        #     "map/map.html",
-        #     selected_file=selected_file,
-        #     form=form,
-        #     time_form=time_form,
-        #     select_file_form=select_file_form,
-        #     image_source=image_src)
 
     image_src = plotter.save()
     wrf_manager.close_dataset()

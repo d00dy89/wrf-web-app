@@ -27,7 +27,10 @@ begin
 
 ; read the following namelist file
 ;  print(wpsFilePath)
-  filename = wpsFilePath
+; TODO: just wrap the ncl script with a bash script to provide variables easily
+; hardcoded namelist.wps file path relative to where this script supposed to run
+; which is -> /path/to/wrf-web-app/app/run_wrf/static
+  filename = "../../../Build_WRF/WPS-4.5/namelist.wps"
 ; Set the colors to be used
   colors = (/"white","black","White","ForestGreen","DeepSkyBlue","Red","Blue"/)
   gsn_define_colormap(wks, colors)  

@@ -4,7 +4,7 @@ from time import sleep
 from datetime import date, datetime
 
 import app.run_wrf.repository as run_repository
-from flask import request, render_template, url_for, redirect, send_file, current_app
+from flask import request, render_template, url_for, redirect, send_file, current_app, flash
 
 from app.run_wrf import run_wrf_bp
 from path_config import PathConfig
@@ -219,31 +219,36 @@ def wrf():
             wps_file.write(namelist_input_content)
 
         # TODO: delete old files
-        # delete_prev_outputs = "rm /home/miade/Build_WRF/WRF-4.3-ARW/test/em_real/wrfout* " \
-        #                       "/home/miade/Build_WRF/WRF-4.3-ARW/test/em_real/outputs.zip"
-        #
-        # os.system(delete_prev_outputs)
-        sleep(5)
-        run_repository.run_real_exe()
+        sleep(2)
+        is_run_ok = run_repository.run_real_exe()
+        if not is_run_ok:
+            flash("Please check your WRF configuration.")
+            return redirect(url_for(".wrf"))
 
+        print(f"Successfull real.exe run, continuing with wrf.exe with core count: {core}")
         run_log_file_name = f"wrf_run_{datetime.utcnow().strftime(log_time_fmt)}.log"
-        run_repository.run_wrf_exe(log_file_name=run_log_file_name)
+        # global run_wrf_process
+        # process_id = 1
+        run_success = run_repository.run_wrf_exe(log_file_name=run_log_file_name, core_count=core)
+        if run_success:
+            run_repository.move_wrf_outs()
+            return redirect(url_for("file_selection_bp.index"))
+        else:
+            return redirect(url_for("run_wrf_bp.run"))
 
-        return redirect(url_for('run_wrf_bp.output'))
     else:
         return render_template("run_wrf/wrf.html")
 
 
-@run_wrf_bp.route('/output', methods=["GET", "POST"])
-def output():
-    if request.method == "GET":
-        # TODO: move wrfout files to /data/wrf once the run completes
-
-        return render_template('run_wrf/output.html')
-    else:
-        return send_file("/home/miade/Build_WRF/WRF-4.3-ARW/test/em_real/outputs.zip", as_attachment=True)
-
-
-@run_wrf_bp.route('/download', methods=["GET", "POST"])
-def download():
-    return send_file("/home/miade/Build_WRF/WRF-4.3-ARW/test/em_real/outputs.zip", as_attachment=True)
+# @run_wrf_bp.route('/output', methods=["GET", "POST"])
+# def output():
+#     if request.method == "GET":
+#
+#         return render_template('run_wrf/output.html')
+#     else:
+#         return send_file("/home/miade/Build_WRF/WRF-4.3-ARW/test/em_real/outputs.zip", as_attachment=True)
+#
+#
+# @run_wrf_bp.route('/download', methods=["GET", "POST"])
+# def download():
+#     return send_file("/home/miade/Build_WRF/WRF-4.3-ARW/test/em_real/outputs.zip", as_attachment=True)

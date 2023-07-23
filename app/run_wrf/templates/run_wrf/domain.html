@@ -1,40 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Check the domain!</title>
-  <style>
-    body {
-    background-color: rgb(228, 237, 232);
-    }
-
-    .header {
-    font-size: 40px;
-    }
-
-  </style>
-</head>
-<body>
-<div style="text-align:center; color: white;background-color:rgb(22,8,90);">
-   <p class="header" > WRF-Online</p>
+{% extends "base.html" %}
+{% block content %}
+<div id="myModal" class="modal">
+  <!-- Modal content -->
+  <div class="modal-content">
+      <div class="loader"></div>
+    <p>Geogrid ve Metgrid çalıştırılıyor. Lütfen bekleyiniz.</p>
   </div>
-<center>
-<h2> 3) Model etki alanını kontrol edin. <br>Bir önceki sayfaya giderek girdiğiniz değerleri değiştirebilirsiniz.</h2>
 
-    <form method="post" action="{{ url_for('run_wrf_bp.domain') }}">
-        <div>
-            <br>
-            <hr>
-        <img src="{{ url_for('run_wrf_bp.static', filename='wps_show_dom.png') }}" alt="wpsdomain" style="width:30%">
-        </div>
+</div>
+
+<h2> 3) Model etki alanını kontrol edin. <br>Bir önceki sayfaya giderek girdiğiniz değerleri değiştirebilirsiniz.</h2>
+<form method="post" action="{{ url_for('run_wrf_bp.domain') }}">
+    <div>
         <br>
-        <hr>
+        <img src="{{ url_for('run_wrf_bp.static', filename='wps_show_dom.png') }}" alt="wpsdomain" style="width:30%">
+    </div>
+        <br>
         <input style="background-color:#7d7688; cursor:pointer;" value="Geogrid ve Metgrid programlarını çalıştırın"
                type="submit"
                name="domaincheck"
-               id="domaincheck">
+               id="domaincheck"
+               onclick="var modal = document.getElementById('myModal');modal.style.display = 'block';">
 <br><br><br>
-    </form>
-</center>
-</body>
-</html>
+</form>
+
+{% endblock content %}

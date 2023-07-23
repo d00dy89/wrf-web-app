@@ -1,66 +1,14 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <title>WRF-Online</title>
-  <style>
-    body {
-    background-color: rgb(228, 237, 232);
-    }
-
-    .header {
-    font-size: 40px;
-    }
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgb(0,0,0);
-  background-color: rgba(0,0,0,0.4);
-}
-.modal-content {
-  background-color: #fefefe;
-  margin: 15% auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
-
-}
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
-.close:hover,
-.close:focus {
-  color: black;
-  text-decoration: none;
-  cursor: pointer;
-}
-  </style>
-
-</head>
-  <body>
-  <!-- The Modal -->
-<div id="myModal" class="modal" style="display:none">
-
+{% extends 'base.html' %}
+{% block content %}
+<div id="myModal" class="modal">
   <!-- Modal content -->
   <div class="modal-content">
-
+      <div class="loader"></div>
     <p>Verileriniz indiriliyor. Lütfen bekleyiniz.</p>
   </div>
-
 </div>
-  <div style="text-align:center; color: white;background-color:rgb(22,8,90);">
-   <p class="header" > WRF-Online</p>
-  </div>
-    <form method="post" action="{{ url_for('run_wrf_bp.run_wrf') }}" >
-      <center>
+
+    <form method="post" action="{{ url_for('run_wrf_bp.run_wrf') }}">
         <h2>1)   GFS (0.5) verileri indirilir ve ungrib programı çalıştırılır.</h2>
         <br>
         <br>
@@ -82,7 +30,7 @@
             <tr>
               Simülasyon Başlangıç Saati &nbsp &nbsp &nbsp
 
-              <input type="radio" id="gfsBaslangicSaati1" name="gfsBaslangicSaati" value="00">
+              <input type="radio" id="gfsBaslangicSaati1" name="gfsBaslangicSaati" value="00" checked>
               <label for="gfsBaslangicSaati1">00 &nbsp</label>
               <input type="radio" id="gfsBaslangicSaati2" name="gfsBaslangicSaati" value="06">
               <label for="gfsBaslangicSaati2">06 &nbsp</label>
@@ -107,7 +55,7 @@
              &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Simülasyon Bitiş Saati &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
               <input type="radio" id="gfsBitisSaati1" name="gfsBitisSaati" value="00">
               <label for="gfsBitisSaati1">00 &nbsp</label>
-              <input type="radio" id="gfsBitisSaati2" name="gfsBitisSaati" value="03">
+              <input type="radio" id="gfsBitisSaati2" name="gfsBitisSaati" value="03" checked>
               <label for="gfsBitisSaati2">03 &nbsp</label>
               <input type="radio" id="gfsBitisSaati3" name="gfsBitisSaati" value="06">
               <label for="gfsBitisSaati3">06 &nbsp</label>
@@ -146,10 +94,5 @@
           <p> <em> NOT: Başlangıç ve bitiş saatlerinin UTC olarak girilmesi gerektiğini unutmayın.</em></p>
           </tbody>
         </table>
-      </center>
     </form>
-  <footer>
-  <div align="center"><img style="width:10%;padding-top:5%;" src=" {{ url_for('run_wrf_bp.static', filename='itulogo.png') }}" alt="logo"></div>
-  </footer>
-  </body>
-</html>
+{% endblock content %}

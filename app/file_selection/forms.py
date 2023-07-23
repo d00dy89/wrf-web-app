@@ -8,8 +8,8 @@ from wtforms.validators import DataRequired
 from app import FlaskApp
 from path_config import PathConfig
 
-current_app: FlaskApp
-path_config: PathConfig = current_app.get("PATH_CONFIG")
+current_app: FlaskApp = current_app
+path_config: PathConfig = current_app.config.get("PATH_CONFIG")
 
 
 class SelectFileForm(FlaskForm):

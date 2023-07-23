@@ -1,25 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>WRF-Online</title>
-  <style>
-    body {
-    background-color: rgb(228, 237, 232);
-    }
-
-    .header {
-    font-size: 40px;
-    }
-  </style>
-
-</head>
-  <body>
-  <div style="text-align:center; color: white;background-color:rgb(22,8,90);">
-   <p class="header" > WRF-Online</p>
-  </div>
+{% extends 'base.html' %}
+{% block content %}
     <form method="post" action="{{ url_for('run_wrf_bp.wps') }}" >
-      <center>
-        <h3>2) Model etki alanını belirleyin. </h3>
+
+        <h2>2) Model etki alanını belirleyin. </h2>
         <table>
 
           <tbody>
@@ -29,21 +12,20 @@
                                              name="e_we"
             value="91"></tr>
             <br>
-            <hr>
             <br>
             <tr>Güney - kuzey yönü &nbsp &nbsp<input type="text"
                                           id="e_sn"
                                           name="e_sn"
             value="100"></tr>
             <br>
-            <hr>
+
             <br>
             <tr>x ve y doğrultusundaki çözünürlük &nbsp &nbsp<input type="text"
                                      id="dxdy"
                                      name="dxdy"
             value="27">km</tr>
             <br>
-            <hr>
+
             <br>
 
             <tr>Enlem &nbsp &nbsp<input type="text"
@@ -51,14 +33,14 @@
                                           name="ref_lat"
             value="41"></tr>
             <br>
-            <hr>
+
             <br>
             <tr>Boylam &nbsp &nbsp<input type="text"
                                           id="ref_lon"
                                           name="ref_lon"
             value="29"></tr>
             <br>
-            <hr>
+
             <br>
             <tr>1. gerçek enlem &nbsp&nbsp<input type="text"
                                            id="truelat1"
@@ -76,20 +58,12 @@
           <br>
           <p>NOT: WPS adımında belirlediğiniz alanın projeksiyonu Lambert olarak ayarlanmıştır. Parametreleri eksiksiz giriniz.</p>
           <br>
-            <hr>
+
             <br>
             <tr><input style="background-color:#7d7688; cursor:pointer;"value="İlerle" type="submit"
                                                 name="geogrid.exe"
                                                 id="geogrid.exe" ></tr>
           </tbody>
         </table>
-
-
-      </center>
-
-
-
-
     </form>
-  </body>
-</html>
+{% endblock content %}

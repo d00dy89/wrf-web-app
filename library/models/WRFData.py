@@ -25,6 +25,8 @@ class WRFData:
         self.dt = self.ds.DT
         self.model_type = self.ds.SIMULATION_INITIALIZATION_TYPE
         self.simulation_start_date = self.ds.SIMULATION_START_DATE
+        self.x_grid_count = self.ds.getncattr("WEST-EAST_GRID_DIMENSION")
+        self.y_grid_count = self.ds.getncattr("SOUTH-NORTH_GRID_DIMENSION")
 
         self._available_times: [dict] = []
         self._terrain_var: xr.DataArray = None

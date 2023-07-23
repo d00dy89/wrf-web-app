@@ -7,18 +7,17 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
 </head>
 <body>
-<br>
-<br>
-<div class="navbar-content" style="text-align: center; padding: 10px 15px;">
-    <nav>
-        <a href="{{ url_for('index') }}">Home</a>
-        <a href="{{ url_for('run_wrf_bp.index') }}">Run WRF</a>
-        <a href="{{ url_for('file_selection_bp.index') }}">Select Files</a>
-        <a href="{{ url_for('map_bp.index') }}">Create Maps</a>
-    </nav>
-</div>
-<hr>
+{% include 'navbar.html' %}
 <div class="content" style="text-align: center;">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
     {% block content %}
     {% endblock %}
 </div>
