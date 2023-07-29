@@ -164,3 +164,6 @@ Build_WRF/
 
 # Data folder
 data/
+
+# ncl show domain file
+app/run_wrf/static/wps_show_dom.png
