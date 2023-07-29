@@ -10,6 +10,7 @@
 </div>
 
 <h2> 3) Model etki alanını kontrol edin. <br>Bir önceki sayfaya giderek girdiğiniz değerleri değiştirebilirsiniz.</h2>
+{# TODO: Lose below form and use a linked button #}
 <form method="post" action="{{ url_for('run_wrf_bp.domain') }}">
     <div>
         <br>
@@ -23,5 +24,4 @@
                onclick="var modal = document.getElementById('myModal');modal.style.display = 'block';">
 <br><br><br>
 </form>
-
 {% endblock content %}

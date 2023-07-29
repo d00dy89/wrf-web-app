@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import render_template
+from flask_session import Session
 
 from config import Config
 
@@ -14,6 +15,8 @@ class FlaskApp(Flask):
         # noinspection PyArgumentList
         super().__init__(__name__, *flask_args, **flask_kwargs)
         self.config.from_object(Config)
+        Session(self)
+
         _path_config = self.config.get("PATH_CONFIG")
         self.wrf_manager = WrfOutManager(
             path_config=_path_config
@@ -23,7 +26,6 @@ class FlaskApp(Flask):
 def create_flask_app() -> FlaskApp:
 
     app = FlaskApp()
-
     logger = app.logger
     logger.debug(f"Initialized app: {app.name}")
 

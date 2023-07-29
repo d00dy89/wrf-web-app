@@ -3,14 +3,14 @@
 {% block content %}
 <p>Looks like you do now have WRF model installed in the context of this App.</p>
 <p>If you have WRF installed somewhere else on your computer,</p>
-<p> please go to path_config.py folder and configure the Build_WRF folder path.</p>
+<p> please go to path_config.py file and configure the Build_WRF folder path.</p>
 <br>
 <p>You will not get any information about the installation process from this page. </p>
-<p>A log file named {{ installation_log_file }}will be created in the logs directory of this app.</p>
+<p>A log file named {{ installation_log_file }} will be created in the logs directory of this app.</p>
 <p>Installation may take several hours and it takes 52 GB storage. Be sure that you have enough time and storage.</p>
 <p>If you want to install WRF for this app please click:
-    <button class="favorite styles" type="button" onclick="window.location.href='{{ url_for('.install') }}'">
-        Install
-    </button>
+<button class="favorite styles" type="button" onclick="window.location.href='{{ url_for('.install') }}'">
+    Install WRF
+</button>
 </p>
 {% endblock %}

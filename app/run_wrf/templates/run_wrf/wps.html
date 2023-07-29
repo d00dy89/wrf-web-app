@@ -1,69 +1,65 @@
 {% extends 'base.html' %}
 {% block content %}
-    <form method="post" action="{{ url_for('run_wrf_bp.wps') }}" >
-
-        <h2>2) Model etki alanını belirleyin. </h2>
-        <table>
-
-          <tbody>
-
-            <tr> Batı - doğu yönü &nbsp &nbsp<input type="text"
-                                             id="e_we"
-                                             name="e_we"
-            value="91"></tr>
-            <br>
-            <br>
-            <tr>Güney - kuzey yönü &nbsp &nbsp<input type="text"
-                                          id="e_sn"
-                                          name="e_sn"
-            value="100"></tr>
-            <br>
-
-            <br>
-            <tr>x ve y doğrultusundaki çözünürlük &nbsp &nbsp<input type="text"
-                                     id="dxdy"
-                                     name="dxdy"
-            value="27">km</tr>
-            <br>
-
-            <br>
-
-            <tr>Enlem &nbsp &nbsp<input type="text"
-                                          id="ref_lat"
-                                          name="ref_lat"
-            value="41"></tr>
-            <br>
-
-            <br>
-            <tr>Boylam &nbsp &nbsp<input type="text"
-                                          id="ref_lon"
-                                          name="ref_lon"
-            value="29"></tr>
-            <br>
-
-            <br>
-            <tr>1. gerçek enlem &nbsp&nbsp<input type="text"
-                                           id="truelat1"
-                                           name="truelat1"
-            value="30.0"></tr>
-            <br>
-
-            <br>
-            <tr>2. gerçek enlem &nbsp &nbsp<input type="text"
-                                           id="truelat2"
-                                           name="truelat2"
-            value="60.0"></tr>
-
-          <br>
-          <br>
-          <p>NOT: WPS adımında belirlediğiniz alanın projeksiyonu Lambert olarak ayarlanmıştır. Parametreleri eksiksiz giriniz.</p>
-          <br>
-
-            <br>
-            <tr><input style="background-color:#7d7688; cursor:pointer;"value="İlerle" type="submit"
-                                                name="geogrid.exe"
-                                                id="geogrid.exe" ></tr>
-          </tbody>
-        </table>
-    </form>
+<h2>{{ form.title }}</h2>
+<form method="post" action="{{ url_for('run_wrf_bp.wps') }}">
+    {{ form.hidden_tag() }}
+    <table>
+        <tbody>
+        <tr>
+            {{ form.east_west_grid_count.description }} &nbsp &nbsp
+            {{ form.east_west_grid_count }}
+        </tr>
+        <br>
+        <br>
+        <tr>
+            {{ form.north_south_grid_count.description }} &nbsp &nbsp
+            {{ form.north_south_grid_count }}
+        </tr>
+        <br>
+        <br>
+        <tr>
+            {{ form.grid_resolution.description }} &nbsp &nbsp
+            {{ form.grid_resolution }} km
+        </tr>
+        <br>
+        <br>
+        <tr>
+            {{ form.ref_lat.description }} &nbsp &nbsp
+            {{ form.ref_lat }}
+        </tr>
+        <br>
+        <br>
+        <tr>
+            {{ form.ref_lon.description }} &nbsp &nbsp
+            {{ form.ref_lon }}
+        </tr>
+        <br>
+        <br>
+        <tr>
+            {{ form.true_lat_1.description }} &nbsp &nbsp
+            {{ form.true_lat_1 }}
+        </tr>
+        <br>
+        <br>
+        <tr>
+            {{ form.true_lat_2.description }} &nbsp &nbsp
+            {{ form.true_lat_2 }}
+        </tr>
+        <br>
+        <br>
+        <p>NOT: WPS adımında belirlediğiniz alanın projeksiyonu Lambert olarak ayarlanmıştır. Parametreleri eksiksiz
+            giriniz.
+        </p>
+        <br>
+        <br>
+        <tr>
+            <input style="background-color:#7d7688; cursor:pointer;"
+                   value="İlerle"
+                   type="submit"
+                   name="geogrid.exe"
+                   id="geogrid.exe">
+        </tr>
+        </tbody>
+    </table>
+</form>
 {% endblock content %}

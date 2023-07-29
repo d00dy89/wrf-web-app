@@ -15,6 +15,8 @@ class Config:
     SECRET_KEY = "really-secret-key"  # uuid.uuid4().hex
     SERVER_NAME = f"{_host}:{_port}" if int(_port) > 0 else f"{_host}"
     PREFERRED_URL_SCHEME = _schema
+
+    SESSION_TYPE = "filesystem"
     SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_REFRESH_EACH_REQUEST = False
 

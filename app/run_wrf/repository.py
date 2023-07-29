@@ -20,21 +20,6 @@ WRF_FOLDER_PATH = path_config.WRF_INSTALL_FOLDER_PATH.joinpath(WRF_FOLDER)
 WRF_RUN_FOLDER_PATH = WRF_FOLDER_PATH.joinpath("run")
 
 
-def download_gfs_and_write_to_file(url: str, file_name_to_save: str) -> None:
-    file_path = path_config.GFS_FOLDER_PATH.joinpath(file_name_to_save)
-    if file_path.exists():
-        return
-
-    try:
-        print("Starting to download.")
-        response = requests.get(url)
-        with open(file_path, "wb") as gfs_file:
-            gfs_file.write(response.content)
-        print(f"Downloaded and saved file to {file_path=}")
-    except Exception as e:
-        print(f"Excetion occurred downloading {file_name_to_save} details:{e}")
-
-
 def install_wrf(log_file_path: Path) -> None:
     # WRF4.5_Install.bash
     # install_script_path = path_config.library_folder.joinpath(WRF_INSTALL_SCRIPT)
@@ -58,12 +43,41 @@ def link_ungrib_variable_table() -> str:
     return cmd_result.stdout.decode("utf-8")
 
 
-def link_grib() -> str:
+def clean_linked_files():
+    for file_name in os.listdir(WPS_FOLDER_PATH):
+        if ("FILE" in file_name) or ("met_em" in file_name):
+            os.remove(WPS_FOLDER_PATH.joinpath(file_name))
+            print(f"Removed file: {file_name}")
+
+    for file_name in os.listdir(WRF_RUN_FOLDER_PATH):
+        if "met_em" in file_name:
+            os.remove(WRF_RUN_FOLDER_PATH.joinpath(file_name))
+            print(f"Removed file from WRF/run: {file_name}")
+
+
+def clean_gfs_folder():
+    old_gfs_files = [Path(wrfout) for wrfout in glob(str(path_config.GFS_FOLDER_PATH.joinpath("gfs.*")))]
+    for file in old_gfs_files:
+        file: Path
+        os.remove(file)
+        print(f"Removed {file=}")
+    # new_gfs_files = [path_config.GFS_BACKUP_FOLDER.joinpath(path.name) for path in old_gfs_files]
+    # # TODO: check params
+    # try:
+    #     for src, target in zip(old_gfs_files, new_gfs_files):
+    #         src.rename(target)
+    #         print(f"Moved from: {src=} To {target=}")
+    # except Exception as e:
+    #     print(f'Exception occurred while moving GFS files, details: \n{e}')
+
+
+def link_grib(downloaded_gfs_files: [Path]) -> str:
     print("Linking Grib data.")
     # TODO: unify model file names with download method
-    link_gfs_data_path = path_config.GFS_FOLDER_PATH.joinpath("gfs")
+    # link_gfs_data_path = path_config.GFS_FOLDER_PATH.joinpath("gfs")
+    link_gfs_data_path = os.path.commonprefix(downloaded_gfs_files)
     cmd_result = subprocess.run([
-        "./link_grib.csh", link_gfs_data_path.as_posix(),
+        "./link_grib.csh", link_gfs_data_path,
     ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=WPS_FOLDER_PATH.as_posix())
     return cmd_result
 
@@ -92,6 +106,7 @@ def run_geogrid_exe():
 
 def run_metgrid_exe():
     metgrid_exe_file_path = WPS_FOLDER_PATH.joinpath("metgrid.exe")
+    # TODO: metgrid bug: PFILE. files created instead of FILE's ->  ParcialFile
     print('Running metgrid.exe')
     cmd_metgrid_exe = subprocess.run(
         ["./metgrid.exe"], shell=True,
@@ -162,11 +177,12 @@ def run_real_exe() -> bool:
             return True
 
 
-def run_wrf_exe(log_file_name: str, core_count: int) -> bool:
+def run_wrf_exe(core_count: int) -> bool:
     # wrf_run_log_file_path = path_config.LOGS_FOLDER.joinpath(log_file_name)
     # log_file = open(wrf_run_log_file_path, "w")
     # TODO: add rsl.error to logs
     print(f"Running wrf.exe with core count: {core_count}")
+    # TODO: --use-hwthread-cpus for maxing out process count
     run_wrf_process = subprocess.Popen(
         ["mpirun", "-np", str(core_count), "./wrf.exe"],
         cwd=WRF_RUN_FOLDER_PATH.as_posix(),

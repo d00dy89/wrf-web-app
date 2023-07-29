@@ -20,3 +20,9 @@
     </ul>
   {% endif %}
 {% endmacro %}
+
+{% macro field_error_span_red(field) %}
+  {% for error in field.errors %}
+    <span style="color: red;">[{{ error }}]</span>
+  {% endfor %}
+{% endmacro %}

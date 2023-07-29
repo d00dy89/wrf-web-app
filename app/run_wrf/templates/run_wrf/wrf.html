@@ -8,69 +8,42 @@
     </div>
 </div>
 
+<h2> 4) Modeli çalıştırın. </h2>
 <form method="post" action="{{ url_for('run_wrf_bp.wrf') }}">
-        <h2> 4) Modeli çalıştırın. </h2>
-        <table>
-
-            <tbody>
-
-            <tr>
-
-                <h4>Mikrofizik Süreci Seçin</h4>
-                <input type="radio" id="Kessler" name="microphy" value="1" checked>
-                <label for="Kessler">Kessler &nbsp</label> <br> <br>
-                <input type="radio" id="WSM3" name="microphy" value="3">
-                <label for="WSM3">WSM3 &nbsp</label><br><br>
-                <input type="radio" id="Ferrier" name="microphy" value="5">
-                <label for="Ferrier"> Ferrier &nbsp</label><br><br>
-                <input type="radio" id="WSM5" name="microphy" value="4">
-                <label for="WSM5">WSM5 &nbsp</label><br><br>
-                <input type="radio" id="Lin" name="microphy" value="2">
-                <label for="Lin">Lin &nbsp</label><br><br>
-                <input type="radio" id="WSM6" name="microphy" value="6">
-                <label for="WSM6">WSM6 &nbsp</label>
-            </tr>
-            <br>
-
-            <tr><h4>Atmosferik Sınır Tabakası Seçiniz</h4><select name="pbl">
-                <option value="1">YSU</option>
-                <option value="2">MYJ</option>
-                <option value="6">MYNN3</option>
-                <option value="4">QNSE-EDMF</option>
-                <option value="5">MYNN2</option>
-                <option value="6">MYNN3</option>
-                <option value="7">ACM2</option>
-            </select></tr>
-            <br>
-            <tr><h4>Kümülüs Parametrizasyonu Seçiniz </h4><select name="cumulus">
-                <option value="1">Kain–Fritsch Scheme</option>
-                <option value="2">Betts-Miller-Janjic</option>
-                <option value="3">Grell-Freitas</option>
-                <option value="4">Old Simplied Arakawa-Schubert</option>
-                <option value="5">Grell-3</option>
-                <option value="6">Tiedtke</option>
-            </select></tr>
-            <br>
-
-            <tr><h4>Kaç Çekirdek ile Paralel Çalışacağını Seçiniz </h4><select name="core">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-            </select></tr>
-            <br>
-            <br>
-            <br>
-            <tr>
-                <input value="Modeli Çalıştır"
-                       type="submit"
-                       name="modelrun"
-                       id="modelrun"
-                       onclick="var modal = document.getElementById('myModal');modal.style.display = 'block';">
-            </tr>
-            </tbody>
-        </table>
+    {{ form.hidden_tag() }}
+    <table>
+        <tbody>
+        <tr>
+            <h4>{{ form.microphy.description }}</h4>
+            {% for subfield in form.microphy %}
+                {{ subfield }}{{ subfield.label }} <br><br>
+            {% endfor %}
+        </tr>
+        <tr>
+            <h4>{{ form.pbl.description }}</h4>
+            {{ form.pbl }}
+        </tr>
+        <br>
+        <tr>
+        <h4>{{ form.cumulus.description}}</h4>
+            {{ form.cumulus }}
+        </tr>
+        <br>
+        <tr>
+        <h4>{{ form.core.description }}</h4>
+            {{ form.core }}
+        </tr>
+        <br>
+        <br>
+        <br>
+        <tr>
+            <input value="Modeli Çalıştır"
+                   type="submit"
+                   name="modelrun"
+                   id="modelrun"
+                   onclick="var modal = document.getElementById('myModal');modal.style.display = 'block';">
+        </tr>
+        </tbody>
+    </table>
 </form>
 {% endblock %}
