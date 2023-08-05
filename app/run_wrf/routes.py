@@ -1,18 +1,19 @@
 import os
-from pathlib import Path
 
+from pathlib import Path
 from time import sleep
 from datetime import datetime, timedelta
 
-import app.run_wrf.repository as run_repository
 from flask import request, render_template, url_for, redirect, session, current_app, flash
+
+import app.run_wrf.repository as run_repository
 
 from app.run_wrf import run_wrf_bp
 from app.run_wrf.forms import WpsForm, DomainForm, WrfForm
-from path_config import PathConfig
+from app.path_config import PathConfig
 from library.GfsDownloader import GfsDownloader
 
-
+logger = current_app.logger
 path_config: PathConfig = current_app.config.get("PATH_CONFIG")
 gfs_downloader = GfsDownloader(path_config)
 WRF_INSTALL_SCRIPT = "WRF4.5_Install.bash"
@@ -264,7 +265,7 @@ def wrf():
             flash("Please check your WRF configuration.")
             return redirect(url_for(".wrf"))
 
-        print(f"Successful real.exe run, continuing with wrf.exe with core count: {core}")
+        logger.info(f"Successful real.exe run, continuing with wrf.exe with core count: {core}")
         run_success = run_repository.run_wrf_exe(core_count=core)
         if run_success:
             run_repository.move_wrf_outs()

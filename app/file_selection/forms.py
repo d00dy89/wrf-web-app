@@ -6,7 +6,7 @@ from wtforms import SubmitField, RadioField
 from wtforms.validators import DataRequired
 
 from app import FlaskApp
-from path_config import PathConfig
+from app.path_config import PathConfig
 
 current_app: FlaskApp = current_app
 path_config: PathConfig = current_app.config.get("PATH_CONFIG")

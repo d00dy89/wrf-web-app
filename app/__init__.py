@@ -2,9 +2,8 @@ from flask import Flask
 from flask import render_template
 from flask_session import Session
 
-from config import Config
-
-from app.run_wrf import run_wrf_bp
+from app.config import Config
+from app.path_config import PathConfig
 from app.WrfOutManager import WrfOutManager
 
 
@@ -14,10 +13,13 @@ class FlaskApp(Flask):
     def __init__(self, *flask_args, **flask_kwargs) -> None:
         # noinspection PyArgumentList
         super().__init__(__name__, *flask_args, **flask_kwargs)
+
         self.config.from_object(Config)
+
         Session(self)
 
-        _path_config = self.config.get("PATH_CONFIG")
+        _path_config: PathConfig = self.config.get("PATH_CONFIG")
+        _path_config.create_folders(logger=self.logger)
         self.wrf_manager = WrfOutManager(
             path_config=_path_config
         )
@@ -27,7 +29,8 @@ def create_flask_app() -> FlaskApp:
 
     app = FlaskApp()
     logger = app.logger
-    logger.debug(f"Initialized app: {app.name}")
+    # logger.info(f"Initialized app: {app.name}")
+    # logger.debug(f"Initialized app: {app.name}")
 
     @app.route("/")
     def index():

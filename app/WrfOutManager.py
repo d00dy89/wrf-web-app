@@ -4,7 +4,7 @@ import wrf
 
 from netCDF4 import Dataset
 
-from path_config import PathConfig
+from app.path_config import PathConfig
 from library.models.WRFData import WRFData
 from library.utils import Singleton
 

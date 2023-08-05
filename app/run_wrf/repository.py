@@ -4,12 +4,11 @@ import subprocess
 from glob import glob
 from pathlib import Path
 
-import requests
-
 from flask import current_app
 
-from path_config import PathConfig
+from app.path_config import PathConfig
 
+logger = current_app.logger
 path_config: PathConfig = current_app.config.get("PATH_CONFIG")
 WRF_INSTALL_SCRIPT = "WRF4.5_Install.bash"
 WPS_FOLDER = "WPS-4.5"
@@ -35,7 +34,7 @@ def install_wrf(log_file_path: Path) -> None:
 
 
 def link_ungrib_variable_table() -> str:
-    print("Linking Variable Table.")
+    logger.info("Linking Variable Table.")
     gfs_vtable = WPS_FOLDER_PATH.joinpath("ungrib/Variable_Tables/Vtable.GFS")
     wps_vtable = WPS_FOLDER_PATH.joinpath("Vtable")
     cmd_args = ["ln", "-sf", gfs_vtable.as_posix(), wps_vtable.as_posix()]
@@ -47,12 +46,12 @@ def clean_linked_files():
     for file_name in os.listdir(WPS_FOLDER_PATH):
         if ("FILE" in file_name) or ("met_em" in file_name):
             os.remove(WPS_FOLDER_PATH.joinpath(file_name))
-            print(f"Removed file: {file_name}")
+            logger.info(f"Removed file: {file_name}")
 
     for file_name in os.listdir(WRF_RUN_FOLDER_PATH):
         if "met_em" in file_name:
             os.remove(WRF_RUN_FOLDER_PATH.joinpath(file_name))
-            print(f"Removed file from WRF/run: {file_name}")
+            logger.info(f"Removed file from WRF/run: {file_name}")
 
 
 def clean_gfs_folder():
@@ -60,19 +59,19 @@ def clean_gfs_folder():
     for file in old_gfs_files:
         file: Path
         os.remove(file)
-        print(f"Removed {file=}")
+        logger.info(f"Removed {file=}")
     # new_gfs_files = [path_config.GFS_BACKUP_FOLDER.joinpath(path.name) for path in old_gfs_files]
     # # TODO: check params
     # try:
     #     for src, target in zip(old_gfs_files, new_gfs_files):
     #         src.rename(target)
-    #         print(f"Moved from: {src=} To {target=}")
+    #         logger.info(f"Moved from: {src=} To {target=}")
     # except Exception as e:
-    #     print(f'Exception occurred while moving GFS files, details: \n{e}')
+    #     logger.info(f'Exception occurred while moving GFS files, details: \n{e}')
 
 
 def link_grib(downloaded_gfs_files: [Path]) -> str:
-    print("Linking Grib data.")
+    logger.info("Linking Grib data.")
     # TODO: unify model file names with download method
     # link_gfs_data_path = path_config.GFS_FOLDER_PATH.joinpath("gfs")
     link_gfs_data_path = os.path.commonprefix(downloaded_gfs_files)
@@ -90,7 +89,7 @@ def run_ungrib_exe() -> str:
 
 
 def run_geogrid_exe():
-    print('Running geogrid.exe')
+    logger.info('Running geogrid.exe')
     cmd_result_geogrid_exe = subprocess.run(
         ["./geogrid.exe"], shell=True,
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
@@ -99,15 +98,15 @@ def run_geogrid_exe():
     cmd_stdout = cmd_result_geogrid_exe.stdout.decode("utf-8")
     result_success_message = "Successful completion of geogrid."
     if result_success_message in cmd_stdout:
-        print(result_success_message)
+        logger.info(result_success_message)
     else:
-        print(f"Something wrong with geogrid.exe, details:\n{cmd_stdout}")
+        logger.warning(f"Something wrong with geogrid.exe, details:\n{cmd_stdout}")
 
 
 def run_metgrid_exe():
     metgrid_exe_file_path = WPS_FOLDER_PATH.joinpath("metgrid.exe")
     # TODO: metgrid bug: PFILE. files created instead of FILE's ->  ParcialFile
-    print('Running metgrid.exe')
+    logger.info('Running metgrid.exe')
     cmd_metgrid_exe = subprocess.run(
         ["./metgrid.exe"], shell=True,
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
@@ -117,13 +116,13 @@ def run_metgrid_exe():
     # out, err = cmd_metgrid_exe.communicate()
     result_success_message = "Successful completion of metgrid."
     if result_success_message in cmd_stdout:
-        print(result_success_message)
+        logger.info(result_success_message)
     else:
-        print(f"Something wrong with metgrid.exe, details:\n{cmd_stdout}")
+        logger.warning(f"Something wrong with metgrid.exe, details:\n{cmd_stdout}")
 
 
 def link_metem():
-    print('Linking metem files.')
+    logger.info('Linking metem files.')
     cmd_link_metem = subprocess.run([
         f"ln -sf {WPS_FOLDER_PATH.joinpath('met_em.*').as_posix()} {WRF_RUN_FOLDER_PATH.as_posix()}/."
     ], shell=True)
@@ -135,7 +134,7 @@ def plot_domain():
     ncl_script_path = path_config.LIBRARY_FOLDER_PATH.joinpath("plotgrids_new_to_png.ncl")
     namelist_wps_file_path = WPS_FOLDER_PATH.joinpath("namelist.wps")
 
-    print("Plotting domain with NCL.")
+    logger.info("Plotting domain with NCL.")
     process = subprocess.Popen(["ncl", "-pQ", ncl_script_path.as_posix()],
                                cwd=run_bp_static_folder.as_posix(),
                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -151,7 +150,7 @@ def plot_domain():
         process.kill()
         outs = process.communicate()
 
-    print(f"-- Ncl plot domain --\noutput:{outs}")
+    logger.info(f"-- Ncl plot domain --\noutput:{outs}")
 
 
 def run_real_exe() -> bool:
@@ -168,10 +167,10 @@ def run_real_exe() -> bool:
     try:
         result = result.strip(real_exe_success_output)
     except Exception as e:
-        print(f"Exception occurred stripping real.exe output, details:\n{e}")
+        logger.warning(f"Exception occurred stripping real.exe output, details:\n{e}")
     finally:
         if len(result) > 0:
-            print(f"Something wrong with real.exe, details:\n{result}")
+            logger.warning(f"Something wrong with real.exe, details:\n{result}")
             return False
         else:
             return True
@@ -181,7 +180,7 @@ def run_wrf_exe(core_count: int) -> bool:
     # wrf_run_log_file_path = path_config.LOGS_FOLDER.joinpath(log_file_name)
     # log_file = open(wrf_run_log_file_path, "w")
     # TODO: add rsl.error to logs
-    print(f"Running wrf.exe with core count: {core_count}")
+    logger.info(f"Running wrf.exe with core count: {core_count}")
     # TODO: --use-hwthread-cpus for maxing out process count
     run_wrf_process = subprocess.Popen(
         ["mpirun", "-np", str(core_count), "./wrf.exe"],
@@ -191,10 +190,10 @@ def run_wrf_exe(core_count: int) -> bool:
     run_success = False
     try:
         out = run_wrf_process.communicate()
-        print(f"wrf.exe completed with output: {out}")
+        logger.info(f"wrf.exe completed with output: {out}")
         run_success = True
     except Exception as e:
-        print(f"Exception occurred details:\n{e}")
+        logger.warning(f"Exception occurred details:\n{e}")
 
     finally:
         return run_success
@@ -207,9 +206,9 @@ def move_wrf_outs():
     #     new_wrfout_path = path_config.WRF_OUTPUT_FOLDER_PATH.joinpath(wrfout_src_path.name)
     #     try:
     #         wrfout_src_path.rename(new_wrfout_path)
-    #         print(f"Moved from: {wrfout_src_path=} To {new_wrfout_path=}")
+    #         logger.info(f"Moved from: {wrfout_src_path=} To {new_wrfout_path=}")
     #     except Exception as e:
-    #         print(f'Exception occurred while moving wrfout file, details: \n{e}')
+    #         logger.info(f'Exception occurred while moving wrfout file, details: \n{e}')
 
     wrf_out_paths = [Path(wrfout) for wrfout in glob(str(WRF_RUN_FOLDER_PATH.joinpath("wrfout_*")))]
     new_wrf_out_paths = [path_config.WRF_OUTPUT_FOLDER_PATH.joinpath(path.name) for path in wrf_out_paths]
@@ -217,8 +216,8 @@ def move_wrf_outs():
     try:
         for src, target in zip(wrf_out_paths, new_wrf_out_paths):
             src.rename(target)
-            print(f"Moved from: {src=} To {target=}")
-        # print("Moved wrfout files to app data directory.")
+            logger.info(f"Moved from: {src=} To {target=}")
+        # logger.info("Moved wrfout files to app data directory.")
     except Exception as e:
-        print(f'Exception occurred while moving wrfout files, details: \n{e}')
+        logger.warning(f'Exception occurred while moving wrfout files, details: \n{e}')
 

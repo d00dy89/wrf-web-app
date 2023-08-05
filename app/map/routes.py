@@ -1,5 +1,3 @@
-import os
-
 from flask import render_template, session, url_for, redirect, request, current_app
 
 from app import FlaskApp
@@ -8,9 +6,9 @@ from app.WrfOutManager import WrfOutManager
 from app.file_selection.forms import SelectFileForm
 from app.map.forms import SurfacePlotForm, TimeSelectionForm
 
-from library.plotting.CartopyMPLPlotter import CartopyMplPlotter, PlotKwargs
+from library.plotting.CartopyMPLPlotter import CartopyMplPlotter
 
-from path_config import PathConfig
+from app.path_config import PathConfig
 
 
 current_app: FlaskApp

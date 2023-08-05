@@ -1,6 +1,6 @@
 import os
 
-from path_config import PathConfig
+from app.path_config import PathConfig
 
 # load from env and provide defaults
 _debug = os.environ.get('DEBUG', False)

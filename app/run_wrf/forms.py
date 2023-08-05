@@ -97,6 +97,8 @@ class DomainForm(FlaskForm):
             self.errors["projection-error"] = domain_error
             return False
 
+        return True
+
 
 class WrfForm(FlaskForm):
     microphy = fields.RadioField(
