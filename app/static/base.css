@@ -1,19 +1,14 @@
 body {
-background-color: rgb(228, 237, 232);
+ height: 100%;
+ margin: 0;
+ padding: 0;
+    background-color: rgb(228, 237, 232);
 }
 
 .header {
-font-size: 40px;
+    font-size: 40px;
 }
 
-.sidebar {
-  width: 15%;
-  display: block;
-}
-
-.content {
-    text-align: center;
-}
 
 .nav-items {
   width: 100%;
@@ -34,13 +29,57 @@ font-size: 40px;
   display: block;
   color: white;
   text-align: center;
+  font-size: 18px;
   padding: 14px 16px;
   text-decoration: none;
 }
 
-.plot-form li {
+.content {
+    text-align: center;
+    height: 100%;
+}
+
+.sidebar {
+  width: 15%;
+  display: block;
+}
+
+.map-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 100%;
+}
+
+.map-panel {
+    flex: 1;
+    padding: 10px;
+    width: 30%;
+    height: 100%;
+    background-color: #f1f1f1;
+    // overflow: auto;
+}
+
+.map-form li {
   display: inline-block;
   padding: 10px 20px;
+}
+
+.map {
+    flex: 1;
+    margin: auto;
+}
+
+.map-img-wrapper {
+    margin: 0;
+}
+.responsive {
+    // position: absolute;
+    justify-content: left;
+    top: 0px;
+    left: 0px;
+    width: 70%;
+    height: 70%;
 }
 
 .modal {

@@ -2,7 +2,13 @@
 <html lang="tr">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ title }}</title>
+    <title>
+        {% if title %}
+            {{ title }}
+        {% else %}
+            WRF-WEB-APP
+        {% endif %}
+    </title>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
 </head>

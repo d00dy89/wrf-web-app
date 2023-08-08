@@ -1,13 +1,16 @@
-{% extends 'base.html' %}
-
 {% from "helpers/form_helpers.html" import render_field %}
 
 {% block content %}
+<h2>{{ form.selected_file.label }}</h2>
 <form method="POST" action="{{ url_for('.index') }}">
   {{ form.csrf_token }}
-  <dl>
-    {{ render_field(form.selected_file) }}
-  </dl>
-  <p><input type=submit value=Commit>
+  <ul style="list-style: none;">
+    {% for subfield in form.selected_file %}
+    <li>
+      {{ subfield }} {{ subfield.label }}
+    </li>
+    {% endfor %}
+  </ul>
+  {{ form.submit }}
 </form>
 {% endblock %}

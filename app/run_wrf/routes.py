@@ -15,7 +15,7 @@ from library.GfsDownloader import GfsDownloader
 
 logger = current_app.logger
 path_config: PathConfig = current_app.config.get("PATH_CONFIG")
-gfs_downloader = GfsDownloader(path_config)
+gfs_downloader = GfsDownloader(path_config, logger=logger)
 WRF_INSTALL_SCRIPT = "WRF4.5_Install.bash"
 WPS_FOLDER = "WPS-4.5"
 WRF_FOLDER = "WRF-4.5-ARW"

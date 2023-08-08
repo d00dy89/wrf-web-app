@@ -7,10 +7,12 @@ import matplotlib
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
-
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import wrf
 
 from app.WrfOutManager import WrfOutManager
+from app.map.models import CTFVariable
+import library.plotting.color_maps as cmaps
 
 matplotlib.use('WebAgg')
 
@@ -34,16 +36,24 @@ class CartopyMplPlotter:
 
         self._default_proj_transformer: ccrs.Projection = ccrs.PlateCarree()
         self._figure: plt.Figure = None
+        self._left_subtitle: str = ""
+        self._right_subtitle: str = ""
         self._ax: matplotlib.projections.GeoAxes = None
         self.lats = None
         self.lons = None
 
     def create_figure(self, **mpl_fig_kwargs) -> None:
-        self._figure = plt.figure(figsize=self.data_manager.get_figure_size(), **mpl_fig_kwargs)
+        figsize = self.data_manager.get_figure_size()
+
+        self._figure = plt.figure(figsize=figsize, **mpl_fig_kwargs)
+        self._figure.set_facecolor("#e4ede8")
+
+        self._left_subtitle = ""
+        self._right_subtitle = ""
 
         projection_data = self.data_manager.extract_projection_and_bounds()
         self._ax = plt.axes(projection=projection_data["projection"])
-        self._figure.set_facecolor("#e4ede8")
+
         self.lats, self.lons = self.data_manager.get_latitudes_and_longitudes()
 
         x_lim = projection_data["x-limit"]
@@ -56,18 +66,54 @@ class CartopyMplPlotter:
         self._ax.set_ylim(y_lim)
         self._ax.coastlines("10m", linewidth=0.8)
 
-    def plot_slp(self, time_step: int = 0):
+    def plot_gridlines(self):
+        # plot grid lines
+        gl = self._ax.gridlines(
+            crs=self._default_proj_transformer,
+            draw_labels=True,
+            x_inline=False,
+            y_inline=False,
+            linewidth=.9, color='black', alpha=0.8, linestyle='--')
+        gl.right_labels = True
+        gl.left_labels = False
+        gl.top_labels = False
+        gl.bottom_labels = True
+        gl.xlabel_style = {'rotation': 0, "va": "center", "bbox": {"pad": 2}}
+        gl.xpadding = 10
+        # gl.ypadding = 0.2
+        gl.xformatter = LONGITUDE_FORMATTER
+        gl.yformatter = LATITUDE_FORMATTER
+
+    def generate_figure_title(self, timeidx: int = 0):
+        date = self.data_manager.get_time_string_by_index(timeidx)
+        self._left_subtitle += f" GFS INPUT FROM: {self.data_manager.data.simulation_start_date}\n" \
+                               f"{self.data_manager.data.title}"
+        self._right_subtitle += f"Valid for: {date} UTC"
+
+    def plot_slp(self, time_step: int = 0, line_color: str = "black"):
         slp_var = self.data_manager.get_slp(timeidx=time_step)
-        # levels = np.arange(940, 1051, 1)
+
+        slp_min = slp_var.min().data.item()
+        slp_max = slp_var.max().data.item()
+        slp_start = int(slp_min - 2) if slp_min % 2 == 0 else int(slp_min - 1)
+        slp_end = int(slp_max + 2) if slp_min % 2 == 0 else int(slp_max + 1)
+        levels = np.arange(slp_start, slp_end, 2)
+
         ct = self._ax.contour(
             self.lons, self.lats,
             slp_var,
-            # levels,
-            linewidths=2, colors="black", alpha=0.8, fmt="%d",
+            levels=levels,
+            linewidths=2, colors=line_color, alpha=0.8,
             transform=self._default_proj_transformer,
+            zorder=5,
         )
-        self._ax.clabel(ct, inline=True, fontsize=8)
+        self._ax.clabel(ct, inline=True, fontsize=12)
         return ct
+
+    def plot_figure_title(self, additional_msg: str = "", **kwargs):
+        self._left_subtitle += additional_msg
+        self._ax.set_title(self._right_subtitle, loc="right")
+        self._ax.set_title(self._left_subtitle, loc="left")
 
     def plot_wind(self, time_step: int = 0, grid_interval: int = 25):
         u_wind, v_wind = self.data_manager.get_10m_winds(timeidx=time_step)
@@ -77,22 +123,31 @@ class CartopyMplPlotter:
             u_wind[::grid_interval, ::grid_interval],
             v_wind[::grid_interval, ::grid_interval],
             transform=self._default_proj_transformer,
-            length=6)
+            length=6, zorder=10)
 
     def plot_contour_fill(self, data_key: str, timeidx: int = 0):
-        data_to_plot = self.data_manager.get_contour_fill_data(data_key, timeidx=timeidx)
-        self._ax.set_title(f"Filled: {data_key}")
-        if not data_to_plot.any() > 0:
-            return
-        # TODO: add better color map selection for variable
-        cmap = "rainbow" if not data_key == "rh2" else "winter_r"
+        ctf_var: CTFVariable = self.data_manager.get_contour_fill_data(data_key, timeidx=timeidx)
+        self._left_subtitle += f" - {ctf_var.title} {ctf_var.unit_text}"
+
+        # if not ctf_var.data_to_plot.any() > 0:
+        #     return
+
+        ctf_kwargs = ctf_var.cmap.create_cmap()
+
         ctf = self._ax.contourf(
             self.lons, self.lats,
-            data_to_plot,
-            cmap=cmap,
-            transform=self._default_proj_transformer
+            ctf_var.data_to_plot,
+            levels=ctf_var.levels,
+            transform=self._default_proj_transformer,
+            zorder=0,
+            **ctf_kwargs,
         )
-        plt.colorbar(ctf, ax=self._ax, shrink=.8)
+        cbar = plt.colorbar(ctf, ax=self._ax,
+                            orientation="horizontal",
+                            ticks=ctf_var.levels,
+                            boundaries=ctf_var.levels,
+                            pad=0.03, shrink=0.83)
+        cbar.set_label(f"{ctf_var.title} {ctf_var.unit_text}")
 
     @staticmethod
     def __show_all_figures():

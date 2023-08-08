@@ -3,39 +3,44 @@
 {% from "helpers/form_helpers.html" import render_form_field_errors %}
 
 {% block content %}
-{% block sidebar %}
-<div class="sidebar w3-sidebar w3-bar-block">
-  {% for file in select_file_form.selected_file.choices %}
-    <a href="{{ url_for('.create_map', selected_file=file) }}" class="w3-bar-item w3-button">{{ file }}</a>
-  {% endfor %}
-</div>
-{% endblock %}
-
 <div class="map-content">
-<p>Welcome to Map page</p>
-<div class="plot-form">
-  <form method="POST" action="{{ url_for('map_bp.create_map', selected_file=selected_file) }}">
-  {{ form.csrf_token }}
-  <ul>
-    <li>{{ form.should_plot_slp.label}} {{ form.should_plot_slp() }}</li>
-    {{ render_form_field_errors(form.should_plot_slp) }}
-    <li>{{ form.should_plot_wind.label}} {{ form.should_plot_wind() }}</li>
-    {{ render_form_field_errors(form.should_plot_wind) }}
-    <li>{{ form.colour_fill_data.label}} {{ form.colour_fill_data() }}</li>
-    {{ render_form_field_errors(form.colour_fill_data) }}
-    <li>{{ time_form.select_time.label }} {{ time_form.select_time() }}</li>
-    {{ render_form_field_errors(time_form.select_time) }}
-  </ul>
-<p>
-<input type="submit" value="Generate">
-</p>
-  </form>
-</div>
-{% if image_source %}
-<div class="map-container">
-  <img src="{{ image_source }}">
-</div>
-{% endif %}
+    <h3>Görselleştirmek istediğiniz yüzey değişkenlerini seçin.</h3>
+    <div class="map-form">
+        <form method="POST" action="{{ url_for('map_bp.index') }}">
+            {{ form.csrf_token }}
+            <ul>
+                <li>{{ form.should_plot_slp.label}}  {{ form.should_plot_slp() }}</li>
+                {{ render_form_field_errors(form.should_plot_slp) }}
+                <li>{{ form.should_plot_wind.label}}  {{ form.should_plot_wind() }}</li>
+                {{ render_form_field_errors(form.should_plot_wind) }}
+                <li>{{ form.colour_fill_data.label}}  {{ form.colour_fill_data() }}</li>
+                {{ render_form_field_errors(form.colour_fill_data) }}
+                <li>{{ time_form.select_time.label }}  {{ time_form.select_time() }}</li>
+                {{ render_form_field_errors(time_form.select_time) }}
+            </ul>
+            <p>
+                <input type="submit" value="Plot">
+            </p>
+        </form>
+    </div>
+
+    <div class="map">
+        <div class="map-img-wrapper">
+            {% if image_source %}
+            <img src="{{ image_source }}" alt="" class="responsive">
+            {% endif %}
+        </div>
+    </div>
+    <p>Seçili dosya adı: {{ selected_file }}</p>
+
+    <form method="POST" action="{{ url_for('file_selection_bp.change_file') }}">
+        {{ select_file_form.csrf_token() }}
+        <h3>Başka bir dosya seçin.</h3>
+        {{ select_file_form.selected_file_select_field() }}
+        {{ select_file_form.submit() }}
+    </form>
+
+
 </div>
 {% endblock %}
 

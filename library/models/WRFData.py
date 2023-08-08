@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Tuple
+from functools import cached_property
 
 import wrf
 import pandas as pd
@@ -41,14 +42,14 @@ class WRFData:
     @property
     def raw_summary(self) -> dict:
         return {
-            "projection": self.map_proj,
-            "centralLatitude": self.cen_lat,
-            "centralLongitude": self.cen_lon,
-            "dX": self.dx,
-            "dY": self.dy,
-            "dT": self.dt,
-            "startDate": self.simulation_start_date,
-            "numTimeSteps": len(self.ds.dimensions['Time'])
+            "Projection": self.map_proj,
+            "Central-Latitude": self.cen_lat,
+            "Central-Longitude": self.cen_lon,
+            "Grid Delta X": self.dx,
+            "Grid Delta Y": self.dy,
+            "Delta T": self.dt,
+            "Start Date": self.simulation_start_date,
+            "Time Steps": len(self.ds.dimensions['Time'])
         }
 
     def sea_level_pressure(self, timeidx: int = 0, unit: str = "hPa"):
@@ -63,10 +64,6 @@ class WRFData:
             var_name=self._terrain_variable_name,
             timeidx=0
         )
-        # self._slp_var = self.extract_variable(
-        #     var_name="slp",
-        #     timeidx=0
-        # )
         # self._pressure_levels_hpa = self.extract_variable(
         #     var_name=self._pres_variable_name,
         #     timeidx=0,
@@ -76,13 +73,6 @@ class WRFData:
         #     timeidx=0,
         #     units='m')
         self._base_vars_loaded = True
-
-    def extract_all_times(self) -> [dict]:
-        all_times = wrf.extract_times(wrfin=self.ds, timeidx=wrf.ALL_TIMES)
-        return [{
-            'idx': idx,
-            'date': datetime.fromisoformat(pd.to_datetime(date).isoformat())
-        } for idx, date in enumerate(all_times)]
 
     def built_in_variables(self) -> dict:
         _variables = {}
@@ -96,10 +86,14 @@ class WRFData:
     def extract_variables(self) -> dict:
         return self.built_in_variables()
 
-    @property
+    @cached_property
     def available_times(self) -> dict:
-        self._available_times = self.extract_all_times()
+        self._available_times = self.__extract_all_times()
         return self._available_times
+
+    def __extract_all_times(self) -> [dict]:
+        all_times = wrf.extract_times(wrfin=self.ds, timeidx=wrf.ALL_TIMES)
+        return [(idx, datetime.fromisoformat(pd.to_datetime(date).isoformat())) for idx, date in enumerate(all_times)]
 
     @property
     def latitudes_and_longitudes_as_np_array(self) -> Tuple[np.ndarray, np.ndarray]:
@@ -137,21 +131,26 @@ class WRFData:
         for varname in variables_list:
             result['variables'].append(wrf.getvar(wrfin=self.ds, varname=varname, timeidx=time_index))
 
-    def calculate_snow(self, timeidx: int = 0):
+    def calculate_snow(self, timeidx: int = 1):
         """
         "SNOW" "SNOWH" "SNOWNC"
 
         :return:
         """
-        t_now = self.extract_variable(var_name="SNOW", timeidx=timeidx, meta=False)
-        t_past = self.extract_variable(var_name="SNOW", timeidx=timeidx-1, meta=False)
-        return t_now - t_past
+        snow_now = self.extract_variable(var_name="SNOW", timeidx=timeidx)
+        if timeidx == 0:
+            return snow_now
 
-    def calculate_rain(self, timeidx: int = 0):
+        snow_prev = self.extract_variable(var_name="SNOW", timeidx=timeidx-1)
+        return snow_now - snow_prev
+
+    def calculate_rain(self, timeidx: int = 1):
         """
         "RAINSH" "RAINC" "RAINNC"
         :return:
         """
-        rain_sum_now = self.extract_variable("RAINC", timeidx=timeidx, meta=False) + self.extract_variable("RAINC", timeidx=timeidx, meta=False)
-        rain_sum_past = self.extract_variable("RAINC", timeidx=timeidx-1, meta=False) + self.extract_variable("RAINC", timeidx=timeidx-1, meta=False)
-        return rain_sum_now - rain_sum_past
+        rain_sum_now = self.extract_variable("RAINC", timeidx=timeidx) + self.extract_variable("RAINC", timeidx=timeidx)
+        if timeidx == 0:
+            return rain_sum_now
+        rain_sum_prev = self.extract_variable("RAINC", timeidx=timeidx-1) + self.extract_variable("RAINC", timeidx=timeidx-1)
+        return rain_sum_now - rain_sum_prev

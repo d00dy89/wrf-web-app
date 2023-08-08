@@ -1,14 +1,19 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="summary">
-    <p>Welcome to Summary Page</p>
-    <lu>
-        {% for key, val in current_file_summary.items() %}
-        <li>{{ key }}: {{ val }}</li>
-        <br>
-        {% endfor %}
-    </lu>
+<div class="summary" style="padding-top: 30px;">
+    <h2>Summary of <span style="color: blue;">{{ selected_file }}</span></h2>
+    <div class="summary-variable-list" style="padding-top: 15px; font-size: 20px;">
+        <lu>
+            {% for key, val in current_file_summary.items() %}
+            <li><span style="font-weight: bold; color: red;">{{ key }}:</span> {{ val }}</li>
+            <br>
+            {% endfor %}
+        </lu>
+    </div>
 </div>
-<a href="{{ url_for('map_bp.create_map', selected_file=selected_file) }}">Map file</a>
+<button onclick="window.location.href='{{ url_for('map_bp.index') }}';">
+    Visualize
+</button>
+
 {% endblock %}

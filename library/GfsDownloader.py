@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from pathlib import Path
+from logging import Logger
 
 import requests
 import pandas as pd
@@ -18,18 +19,20 @@ class GfsDownloader:
     # https://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/gfs.20230717/12/atmos/gfs.t12z.pgrb2.1p00.f000
     _base_url = "https://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod"  # + gfs.20230717/12/atmos/gfs.t12z.pgrb2.1p00.f000
 
-    def __init__(self, path_config: PathConfig):
+    def __init__(self, path_config: PathConfig, logger: Logger):
+        self.logger = logger
         self.path_config = path_config
 
     def download(self, start_date: datetime, end_date: datetime, interval_hours: int) -> [Path]:
         dates_to_fetch = pd.date_range(start_date, end_date, freq=f"{interval_hours}H", inclusive="both")
         file_paths = []
         for date in dates_to_fetch:
-            self._make_date_directory_tree(date)
-            date_folder = date.strftime("%Y%m%d")
+            date_folder_name = date.strftime("%Y%m%d")
+            self._make_date_directory_tree(date_folder_name)
             url = self.generate_gfs_url(date)
             gfs_file_name = url.split("/")[-1]
-            file_path = self._download_and_write_to_file(url=url, date_folder=date_folder, file_name_to_save=gfs_file_name)
+            file_path = self._download_and_write_to_file(url=url, date_folder_name=date_folder_name,
+                                                         file_name_to_save=gfs_file_name)
             os.symlink(file_path, self.path_config.GFS_FOLDER_PATH.joinpath(file_path.name))
             file_paths.append(file_path)
 
@@ -48,31 +51,32 @@ class GfsDownloader:
         gfs_file_name = f"gfs.t{base_run_hour_str}z.pgrb2.{self._resolution}.f{distance_in_hour_str.zfill(3)}"
         return f"{self._base_url}/gfs.{date_str}/{base_run_hour_str}/atmos/{gfs_file_name}"
 
-    def _make_date_directory_tree(self, date: datetime) -> None:
-        date_folder_path = self.path_config.GFS_FOLDER_PATH.joinpath(date.strftime("%Y%m%d"))
+    def _make_date_directory_tree(self, date_folder_name: str) -> None:
+        date_folder_path = self.path_config.GFS_FOLDER_PATH.joinpath(date_folder_name)
         if date_folder_path.exists():
             return
 
         try:
             os.makedirs(date_folder_path)
         except OSError as file_exists_error:
-            print(f"Could not create directory tree for {date_folder_path}, details: \n{file_exists_error}")
+            self.logger.warning(f"Could not create directory tree for {date_folder_path}, details: \n{file_exists_error}")
 
-    def _download_and_write_to_file(self, url: str, date_folder: str, file_name_to_save: str) -> Path:
-        file_path = self.path_config.GFS_FOLDER_PATH.joinpath(f'{date_folder}/{file_name_to_save}')
-        if file_path.exists():
-            return file_path  # early exit if file exists
+    def _download_and_write_to_file(self, url: str, date_folder_name: str, file_name_to_save: str) -> Path:
+        file_name = f'{date_folder_name}/{file_name_to_save}'
+        file_absolute_path = self.path_config.GFS_FOLDER_PATH.joinpath(file_name)
+        if file_absolute_path.exists():
+            return file_absolute_path  # early exit if file exists
 
         try:
-            print(f"Starting to download to {date_folder}/{file_name_to_save}.")
+            self.logger.info(f"Starting to download to {file_name}.")
             response = requests.get(url)
-            with open(file_path, "wb") as gfs_file:
+            with open(file_absolute_path, "wb") as gfs_file:
                 gfs_file.write(response.content)
-            print(f"Downloaded and saved file to {file_path=}")
+            self.logger.info(f"Downloaded and saved file to {file_absolute_path=}")
         except Exception as e:
-            print(f"Excetion occurred downloading {file_name_to_save} details:{e}")
+            self.logger.warning(f"Exception occurred downloading {file_name} details:{e}")
         finally:
-            return file_path
+            return file_absolute_path
 
     @staticmethod
     def distance_in_hour_string_of_gfs(for_date: datetime) -> str:
