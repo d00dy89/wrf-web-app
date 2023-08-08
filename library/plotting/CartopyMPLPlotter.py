@@ -1,18 +1,17 @@
 import io
 import base64
+
 from dataclasses import dataclass
 
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
-import cartopy.feature as cfeature
+
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-import wrf
 
 from app.WrfOutManager import WrfOutManager
 from app.map.models import CTFVariable
-import library.plotting.color_maps as cmaps
 
 matplotlib.use('WebAgg')
 
