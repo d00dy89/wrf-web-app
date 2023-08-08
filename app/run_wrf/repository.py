@@ -21,8 +21,8 @@ WRF_RUN_FOLDER_PATH = WRF_FOLDER_PATH.joinpath("run")
 
 def install_wrf(log_file_path: Path) -> None:
     # WRF4.5_Install.bash
-    # install_script_path = path_config.library_folder.joinpath(WRF_INSTALL_SCRIPT)
-    install_script_path = path_config.LIBRARY_FOLDER_PATH.joinpath("test.sh")
+    install_script_path = path_config.LIBRARY_FOLDER_PATH.joinpath(WRF_INSTALL_SCRIPT)
+    # install_script_path = path_config.LIBRARY_FOLDER_PATH.joinpath("test.sh")
     log_file = open(log_file_path, "w")
     # open up a background thread to run wrf installation script.
     # TODO: do zibillion checks before opening up the installation thread
