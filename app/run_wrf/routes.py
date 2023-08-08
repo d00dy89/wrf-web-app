@@ -97,16 +97,13 @@ def run_wrf():
             end_date=gfs_end_datetime,
             interval_hours=model_input_in_hours
         )
-
+        session["downloaded_files"] = downloaded_files
         # update Vtable
         run_repository.link_ungrib_variable_table()
 
         # removes FILE, GRIBFILE and met_em files
         run_repository.clean_linked_files()
         sleep(1)
-        # link grib
-        run_repository.link_grib(downloaded_files)
-        run_repository.run_ungrib_exe()
 
         return redirect(url_for('run_wrf_bp.wps'))
 
@@ -165,6 +162,11 @@ def wps():
             wps_file.write(namelist_wps_content)
 
         sleep(.2)
+        # link grib
+        downloaded_files = session.pop("downloaded_files")
+        run_repository.link_grib(downloaded_files)
+        run_repository.run_ungrib_exe()
+
         return redirect(url_for('.domain'))
 
 
