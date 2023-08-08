@@ -25,7 +25,8 @@ class Cmap:
 
     @staticmethod
     def _extract_colors_from_named_cmap(cmap_name: str) -> List[str]:
-        return [mcolors.rgb2hex(rgba) for rgba in plt.get_cmap(cmap_name)]
+        cmap = plt.get_cmap(cmap_name)
+        return [mcolors.rgb2hex(rgba) for rgba in cmap(0.5)]
 
     def create_cmap(self) -> Dict:
         if self.type == "uniform":
