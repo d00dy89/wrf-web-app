@@ -6,43 +6,52 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
+from library.plotting.nclcmaps import get_ncl_cmap, create_ncl_cmap_with_linear_segmentation
+
 
 # Try to provide an interface for the plot...
 class Cmap:
-    def __init__(self, name: str, colors: Union[str, List[str]], type: str, **kwargs) -> None:
+    def __init__(self,
+                 name: str,
+                 ncl_cmap_name: str,
+                 type: str,
+                 cbar_extend: str = "neither",
+                 **kwargs) -> None:
         self.name = name
-        self.colors = self._extract_colors_from_named_cmap(colors) if isinstance(colors, str) else colors
         self.type = type
+        self.ncl_cmap_name = ncl_cmap_name
+        self.cbar_extend = cbar_extend
         if type == "uniform":
             self.vmin = kwargs["vmin"]
             self.vmax = kwargs["vmax"]
             self.interval = kwargs["interval"]
+            self._ctf_kwargs = self._create_perceptually_uniform_colormap()
         elif type == "bounded":
             self.bounds = kwargs["bounds"]
+            self._ctf_kwargs = self._create_boundary_normed_cmap()
 
     def __repr__(self):
         return f"<Cmap {self.name}>"
 
-    @staticmethod
-    def _extract_colors_from_named_cmap(cmap_name: str) -> List[str]:
-        cmap = plt.get_cmap(cmap_name)
-        return [mcolors.rgb2hex(rgba) for rgba in cmap(0.5)]
+    @property
+    def levels(self):
+        if self.type == "uniform":
+            return np.arange(self.vmin, self.vmax, self.interval)
+        else:
+            return self.bounds
 
     def create_cmap(self) -> Dict:
-        if self.type == "uniform":
-            return self._create_perceptually_uniform_colormap()
-        elif self.type == "bounded":
-            return self._create_boundary_normed_cmap()
+        return self._ctf_kwargs
 
     def _create_boundary_normed_cmap(self):
-        cmap = mcolors.ListedColormap(self.colors)
+        cmap = get_ncl_cmap(self.ncl_cmap_name)
         norm = mcolors.BoundaryNorm(self.bounds, cmap.N)
-        return {"norm": norm, "cmap": cmap}
+        return {"norm": norm, "cmap": cmap, "levels": self.levels, "extend": self.cbar_extend}
 
     def _create_perceptually_uniform_colormap(self):
         n_bins = (self.vmax - self.vmin) / self.interval  # Number of discrete colors in the colormap
-        cmap = mcolors.LinearSegmentedColormap.from_list(self.name, self.colors, N=n_bins)
-        return {"cmap": cmap, "vmin": self.vmin, "vmax": self.vmax}
+        cmap = create_ncl_cmap_with_linear_segmentation(name=self.name, ncl_cmap_name=self.ncl_cmap_name, n_bins=n_bins)
+        return {"cmap": cmap, "levels": self.levels, "vmin": self.vmin, "vmax": self.vmax, "extend": self.cbar_extend}
 
 
 @dataclass
@@ -50,11 +59,11 @@ class CTVariable:
     var_key: str
     title: str
     unit_text: str
-    data: np.ndarray = None
+    data_to_plot: np.ndarray = None
 
     def calculate_levels(self, interval: int) -> [int]:
-        min_val = self.data.min().data.item()
-        max_val = self.data.max().data.item()
+        min_val = self.data_to_plot.min().data.item()
+        max_val = self.data_to_plot.max().data.item()
         range_start = int(min_val - 2) if min_val % 2 == 0 else int(min_val - 1)
         range_end = int(max_val + 2) if max_val % 2 == 0 else int(max_val + 1)
         levels = np.arange(range_start, range_end, 2)

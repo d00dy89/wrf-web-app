@@ -1,5 +1,7 @@
 from .models import CTFVariable, CTVariable, Cmap
 
+from library.plotting.nclcmaps import get_ncl_cmap
+
 FIELD_KEY_SLP = "slp"
 FIELD_KEY_T2 = "T2"
 FIELD_KEY_TD2 = "td2"
@@ -8,32 +10,13 @@ FIELD_KEY_PREC = "rain"
 FIELD_KEY_SNOW = "snow"
 FIELD_KEY_WIND_10 = "wind10m"
 
+FIELD_KEY_VORTICITY = "avo"
+FIELD_KEY_GEO500 = "gh500"
+FIELD_KEY_RH700 = "rh700"
+FIELD_KEY_WS300 = "ws300"
+FIELD_KEY_TEMP850 = "temp850"
 CT_VAR_SLP = CTVariable(var_key=FIELD_KEY_SLP, title="Deniz Seviyesi Basınç", unit_text="hPa")
 
-# TEMP_COLORS = {
-#     0: "#a50026",
-#     1: "#d73027",
-#
-#     2: "#f46d43",
-#     3: "#fdae61",
-#
-#     4: "#feb24c",  # reds end
-#
-#     5: "#d9f0a3",
-#
-#     6: "#a1d99b",
-#     7: "#41ab5d",
-#     8: "#a8ddb5",
-#
-#     9: "#7fcdbb", # blues start
-#     10: "#41b6c4",
-#
-#     11: "#1d91c0",
-#     12: "#225ea8",
-#
-#     13: "#253494",
-#     14: "#081d58"
-# }
 TEMP_COLORS = [  # reds
     "#9e0142",
     "#d53e4f",
@@ -61,9 +44,9 @@ RH_COLORS = [
     "#253494",
     "#081d58"
 ]
-RH_MIN = 0
+RH_MIN = 50
 RH_MAX = 100
-RH_INTERVAL = 10
+RH_INTERVAL = 5
 
 WIND_10M_COLORS = [
     "#fff7f3",
@@ -80,24 +63,37 @@ WIND_10_MIN = 0.1
 WIND_10_MAX = 20.1
 WIND_10_INTERVAL = 2
 
-PREC_COLORS = ['xkcd:pale blue', 'palegreen', 'xkcd:yellow tan', "xkcd:amber", "xkcd:faded red", "#642a19",
-               "xkcd:very dark brown", "#8f0f74", "#ff00ff"]
-PREC_BOUNDS = [.01, .05, .2, .5, .75, 1, 2, 3, 4, 5]
+PREC_BOUNDS = [.1, 1, 5, 10, 15, 20, 25, 30, 40, 50, 65, 80, 100, 125, 150, 175, 200, 250]
 
 SNOW_COLORS = ["xkcd:light blue grey", "xkcd:silver", "xkcd:greyish", "xkcd:steel"]
-SNOW_BOUNDS = [0.1, 1, 5, 20, 50]
+SNOW_BOUNDS = [0.1, 1, 5, 10, 20, 30, 40, 50, 65, 80, 100]
 
 # reverse to represent highs with reds
-CMAP_T2 = Cmap(name="temp2m_cmap", colors=TEMP_COLORS[::-1], type="uniform", vmin=TEMP_MIN, vmax=TEMP_MAX,
-               interval=TEMP_INTERVAL)
-CMAP_RH = Cmap(name="rh2m_cmap", colors=RH_COLORS, type="uniform", vmin=RH_MIN, vmax=RH_MAX, interval=RH_INTERVAL)
+CMAP_T2 = Cmap(
+    name="temp2m_cmap",
+    ncl_cmap_name="grads_rainbow",
+    type="uniform",
+    vmin=TEMP_MIN,
+    vmax=TEMP_MAX,
+    interval=TEMP_INTERVAL)
 
-CMAP_WIND = Cmap(name="wind10m_cmap", colors=WIND_10M_COLORS, type="uniform", vmin=WIND_10_MIN, vmax=WIND_10_MAX, interval=WIND_10_INTERVAL)
-CMAP_PRECIP = Cmap(name="precip_cmap", colors=PREC_COLORS, type="bounded", bounds=PREC_BOUNDS)
-CMAP_SNOW = Cmap(name="snow_cmap", colors=SNOW_COLORS, type="bounded", bounds=SNOW_BOUNDS)
+CMAP_RH = Cmap(name="rh2m_cmap", ncl_cmap_name="MPL_YlGnBu",
+               type="uniform",
+               vmin=RH_MIN, vmax=RH_MAX,
+               interval=RH_INTERVAL)
+
+CMAP_WIND = Cmap(name="wind10m_cmap", ncl_cmap_name="wind_17lev",
+                 type="uniform",
+                 vmin=WIND_10_MIN, vmax=WIND_10_MAX,
+                 interval=WIND_10_INTERVAL)
+
+CMAP_PRECIP = Cmap(name="precip_cmap", ncl_cmap_name="precip2_16lev",
+                   type="bounded", bounds=PREC_BOUNDS)
+
+CMAP_SNOW = Cmap(name="snow_cmap", ncl_cmap_name="precip2_15lev", type="bounded", bounds=SNOW_BOUNDS)
 
 CTF_VAR_T2 = CTFVariable(var_key=FIELD_KEY_T2, title="2m Sıcaklık", unit_text="($^{\circ}C$)", cmap=CMAP_T2)
-CTF_VAR_TD2 = CTFVariable(var_key=FIELD_KEY_TD2, title="2m Çiğ Noktası Sıcaklığı", unit_text="($^{\circ}C$)",
+CTF_VAR_TD2 = CTFVariable(var_key=FIELD_KEY_TD2, title="2m Çiy Noktası Sıcaklığı", unit_text="($^{\circ}C$)",
                           cmap=CMAP_T2)
 CTF_VAR_RH2 = CTFVariable(var_key=FIELD_KEY_RH2, title="2m Bağıl Nem", unit_text="(%)", cmap=CMAP_RH)
 CTF_VAR_WIND10 = CTFVariable(var_key=FIELD_KEY_WIND_10, title="10m rüzgar hızı", unit_text="(m/s)", cmap=CMAP_WIND)
