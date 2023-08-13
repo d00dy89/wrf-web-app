@@ -64,15 +64,13 @@ class WRFData:
             var_name=self._terrain_variable_name,
             timeidx=0
         )
-        # self._pressure_levels_hpa = self.extract_variable(
-        #     var_name=self._pres_variable_name,
-        #     timeidx=0,
-        #     units='hPa')
-        # self._height_in_meters = self.extract_variable(
-        #     var_name=self._height_variable_name,
-        #     timeidx=0,
-        #     units='m')
         self._base_vars_loaded = True
+
+    def interpolate_to_pressure_level(self, variable_to_interpolate: xr.DataArray, level_to_interpolate: float,
+                                      pressure_units: str = "hPa",
+                                      timeidx: int = 0) -> xr.DataArray:
+        _p = self.extract_variable("pressure", units=pressure_units, timeidx=timeidx)
+        return wrf.interplevel(variable_to_interpolate, _p, level_to_interpolate)
 
     def built_in_variables(self) -> dict:
         _variables = {}
