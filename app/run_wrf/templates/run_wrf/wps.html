@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% from "helpers/form_helpers.html" import render_form_field_errors_red_span %}
+
 {% block content %}
 <h2>{{ form.title }}</h2>
 <form method="post" action="{{ url_for('run_wrf_bp.wps') }}">
@@ -8,42 +10,49 @@
         <tr>
             {{ form.east_west_grid_count.description }} &nbsp &nbsp
             {{ form.east_west_grid_count }}
+            {{ render_form_field_errors_red_span(form.east_west_grid_count)}}
         </tr>
         <br>
         <br>
         <tr>
             {{ form.north_south_grid_count.description }} &nbsp &nbsp
             {{ form.north_south_grid_count }}
+            {{ render_form_field_errors_red_span(form.north_south_grid_count)}}
         </tr>
         <br>
         <br>
         <tr>
             {{ form.grid_resolution.description }} &nbsp &nbsp
             {{ form.grid_resolution }} km
+            {{ render_form_field_errors_red_span(form.grid_resolution)}}
         </tr>
         <br>
         <br>
         <tr>
             {{ form.ref_lat.description }} &nbsp &nbsp
             {{ form.ref_lat }}
+            {{ render_form_field_errors_red_span(form.ref_lat)}}
         </tr>
         <br>
         <br>
         <tr>
             {{ form.ref_lon.description }} &nbsp &nbsp
             {{ form.ref_lon }}
+            {{ render_form_field_errors_red_span(form.ref_lon)}}
         </tr>
         <br>
         <br>
         <tr>
             {{ form.true_lat_1.description }} &nbsp &nbsp
             {{ form.true_lat_1 }}
+            {{ render_form_field_errors_red_span(form.true_lat_1)}}
         </tr>
         <br>
         <br>
         <tr>
             {{ form.true_lat_2.description }} &nbsp &nbsp
             {{ form.true_lat_2 }}
+            {{ render_form_field_errors_red_span(form.true_lat_2)}}
         </tr>
         <br>
         <br>

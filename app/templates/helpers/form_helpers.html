@@ -26,3 +26,13 @@
     <span style="color: red;">[{{ error }}]</span>
   {% endfor %}
 {% endmacro %}
+
+{% macro render_form_field_errors_red_span(field) %}
+  {% if field.errors %}
+    <ul class=errors style="list-style-type: none; font-size: 16pt;">
+    {% for error in field.errors %}
+      <li><span style="color: red;">{{ error }}</span></li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endmacro %}

@@ -60,6 +60,9 @@ class WpsForm(FlaskForm):
 
 
 class DomainForm(FlaskForm):
+    _ref_lat = "ref_lat"
+    _ref_lon = "ref_lon"
+
     title = "2) Model etki alanını belirleyin."
 
     grid_resolution = fields.IntegerField(
@@ -72,11 +75,11 @@ class DomainForm(FlaskForm):
         "north-south-grid-count", description="Güney - kuzey yönü",
         default=100)
     ref_lat = fields.FloatField(
-        "ref-lat", description="Merkez Enlem", validators=[DataRequired()],
+        _ref_lat, description="Merkez Enlem",
         default="30-60 arasında olmalıdır.")
     ref_lon = fields.FloatField(
-        "ref-lon", description="Merkez Boylam",
-        default="giriniz.", validators=[DataRequired()])
+        _ref_lon, description="Merkez Boylam",
+        default="giriniz.")
     true_lat_1 = fields.FloatField(
         "lambert-true-lat-1", description="1. gerçek enlem",
         default=30)
@@ -87,16 +90,27 @@ class DomainForm(FlaskForm):
     def validate(self, extra_validators=None):
         initial_validation = super(DomainForm, self).validate(extra_validators=extra_validators)
         if not initial_validation:
+
+            if self._ref_lat in self.errors:
+                if 'Not a valid float value.' in self.ref_lat.errors:
+                    self.ref_lat.errors.remove('Not a valid float value.')
+                    self.ref_lat.errors.append("Lütfen merkez enlem değeri giriniz.")
+
+            if self._ref_lon in self.errors:
+                if 'Not a valid float value.' in self.ref_lon.errors:
+                    self.ref_lon.errors.remove('Not a valid float value.')
+                    self.ref_lon.errors.append("Lütfen merkez enlem değeri giriniz.")
+
             return False
 
-        # TODO: add validation for fields
         # ref_lat must be in range of true lats
         domain_condition = self.true_lat_1.data <= self.ref_lat.data <= self.true_lat_2.data
         if not domain_condition:
-            domain_error = f"Seçilen merkez enlem değerler Lambert Conformal için uygun değildir. Lütfen seçtiğiniz "
-            self.errors["projection-error"] = domain_error
+            projection_error = f"Seçilen merkez enlem değerler Lambert Conformal için uygun değildir."
+            self.ref_lat.errors.append(projection_error)
+            domain_error = f"Lütfen seçtiğiniz değerin 1. gerçek enlem ve 2. gerçek enlem arasında kaldığından emin olunuz."
+            self.ref_lat.errors.append(domain_error)
             return False
-
         return True
 
 
