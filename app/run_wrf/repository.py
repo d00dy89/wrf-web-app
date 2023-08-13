@@ -60,20 +60,10 @@ def clean_gfs_folder():
         file: Path
         os.remove(file)
         logger.info(f"Removed {file=}")
-    # new_gfs_files = [path_config.GFS_BACKUP_FOLDER.joinpath(path.name) for path in old_gfs_files]
-    # # TODO: check params
-    # try:
-    #     for src, target in zip(old_gfs_files, new_gfs_files):
-    #         src.rename(target)
-    #         logger.info(f"Moved from: {src=} To {target=}")
-    # except Exception as e:
-    #     logger.info(f'Exception occurred while moving GFS files, details: \n{e}')
 
 
 def link_grib(downloaded_gfs_files: [Path]) -> str:
     logger.info("Linking Grib data.")
-    # TODO: unify model file names with download method
-    # link_gfs_data_path = path_config.GFS_FOLDER_PATH.joinpath("gfs")
     link_gfs_data_path = os.path.commonprefix(downloaded_gfs_files)
     cmd_result = subprocess.run([
         "./link_grib.csh", link_gfs_data_path,
@@ -104,8 +94,6 @@ def run_geogrid_exe():
 
 
 def run_metgrid_exe():
-    metgrid_exe_file_path = WPS_FOLDER_PATH.joinpath("metgrid.exe")
-    # TODO: metgrid bug: PFILE. files created instead of FILE's ->  ParcialFile
     logger.info('Running metgrid.exe')
     cmd_metgrid_exe = subprocess.run(
         ["./metgrid.exe"], shell=True,
@@ -140,13 +128,11 @@ def plot_domain():
                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     try:
         # TODO: maybe fix this
-        #  ncl subprocess gets stuck and never returns to give it a timeout
+        #  ncl subprocess gets stuck and never returns so give it a timeout
         #  and catch the error instead of waiting forever it to return.
-        # TODO (BUG): timeout doesnt kill the child process
-        # result = subprocess.run([cmd], shell=True, cwd=run_bp_static_folder.as_posix(), timeout=3,
-        #                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         outs = process.communicate(timeout=3)
     except subprocess.TimeoutExpired as error:
+        logger.info(f"NCL domain output: {error}")
         process.kill()
         outs = process.communicate()
 
@@ -154,7 +140,6 @@ def plot_domain():
 
 
 def run_real_exe() -> bool:
-    em_real_exe_file_path = WRF_FOLDER_PATH.joinpath('test/em_real/real.exe')
     cmd_real_run = subprocess.run(
         ["./real.exe"],
         cwd=WRF_RUN_FOLDER_PATH.as_posix(), shell=True,
@@ -177,8 +162,6 @@ def run_real_exe() -> bool:
 
 
 def run_wrf_exe(core_count: int) -> bool:
-    # wrf_run_log_file_path = path_config.LOGS_FOLDER.joinpath(log_file_name)
-    # log_file = open(wrf_run_log_file_path, "w")
     # TODO: add rsl.error to logs
     logger.info(f"Running wrf.exe with core count: {core_count}")
     # TODO: --use-hwthread-cpus for maxing out process count
@@ -188,6 +171,7 @@ def run_wrf_exe(core_count: int) -> bool:
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT
     )
     run_success = False
+    # TODO: make communicate optional for user
     try:
         out = run_wrf_process.communicate()
         logger.info(f"wrf.exe completed with output: {out}")
@@ -200,16 +184,6 @@ def run_wrf_exe(core_count: int) -> bool:
 
 
 def move_wrf_outs():
-    # This is with single loop
-    # for wrfout in glob(str(WRF_RUN_FOLDER_PATH.joinpath("wrfout_*"))):
-    #     wrfout_src_path = Path(wrfout)
-    #     new_wrfout_path = path_config.WRF_OUTPUT_FOLDER_PATH.joinpath(wrfout_src_path.name)
-    #     try:
-    #         wrfout_src_path.rename(new_wrfout_path)
-    #         logger.info(f"Moved from: {wrfout_src_path=} To {new_wrfout_path=}")
-    #     except Exception as e:
-    #         logger.info(f'Exception occurred while moving wrfout file, details: \n{e}')
-
     wrf_out_paths = [Path(wrfout) for wrfout in glob(str(WRF_RUN_FOLDER_PATH.joinpath("wrfout_*")))]
     new_wrf_out_paths = [path_config.WRF_OUTPUT_FOLDER_PATH.joinpath(path.name) for path in wrf_out_paths]
     # TODO: check params
@@ -220,4 +194,3 @@ def move_wrf_outs():
         # logger.info("Moved wrfout files to app data directory.")
     except Exception as e:
         logger.warning(f'Exception occurred while moving wrfout files, details: \n{e}')
-

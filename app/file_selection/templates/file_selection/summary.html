@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="summary" style="padding-top: 30px;">
-    <h2>Summary of <span style="color: blue;">{{ selected_file }}</span></h2>
+    <h2><span style="color: blue;">{{ selected_file }}</span> dosyasının özeti</h2>
     <div class="summary-variable-list" style="padding-top: 15px; font-size: 20px;">
         <lu>
             {% for key, val in current_file_summary.items() %}
@@ -13,7 +13,7 @@
     </div>
 </div>
 <button onclick="window.location.href='{{ url_for('map_bp.index') }}';">
-    Visualize
+    Görselleştir
 </button>
 
 {% endblock %}

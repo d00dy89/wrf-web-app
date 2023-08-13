@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import render_template, session, url_for, redirect, request, current_app
 
 from app import FlaskApp
@@ -6,7 +8,7 @@ from app.file_selection.routes import selected_file_arg
 from app.map import map_bp
 from app.WrfOutManager import WrfOutManager
 from app.map.forms import SurfacePlotForm, TimeSelectionForm
-import app.map.constants as Constants
+
 from library.plotting.CartopyMPLPlotter import CartopyMplPlotter
 
 from app.path_config import PathConfig
@@ -16,16 +18,6 @@ current_app: FlaskApp
 path_config: PathConfig = current_app.config.get("PATH_CONFIG")
 wrf_manager: WrfOutManager = current_app.wrf_manager
 plotter = CartopyMplPlotter(wrf_data_manager=wrf_manager)
-
-
-# @map_bp.route("/", methods=["GET", "POST"])
-# def index() -> str:
-#     # TODO: fix session
-#     selected_file = session.get(selected_file_arg, None)
-#     if selected_file is None:
-#         return redirect(url_for('file_selection_bp.index'))
-#     # TODO: give an options window instead of directly creating map
-#     return redirect(url_for('.create_map'))
 
 
 @map_bp.route("/", methods=["GET", "POST"])
@@ -48,15 +40,12 @@ def index() -> str:
     )
     selected_time = int(time_form.select_time.data)
     wrf_manager.load_base_variables()
-
+    st = datetime.utcnow()
+    print('Creating Figure...')
     plotter.create_figure()
     plotter.generate_figure_title(timeidx=selected_time)
     if should_plot_slp:
-        if colour_fill_data == Constants.FIELD_KEY_RH2:
-            color = "white"
-        else:
-            color = "black"
-        plotter.plot_slp(time_step=selected_time, line_color=color)
+        plotter.plot_contour(time_step=selected_time)
 
     if should_plot_wind:
         plotter.plot_wind(time_step=selected_time, grid_interval=5)
@@ -68,6 +57,8 @@ def index() -> str:
 
     image_src = plotter.save()
     wrf_manager.close_dataset()
+    et = datetime.utcnow()
+    print(f"Creating Figure took: {(et - st).total_seconds()}")
     return render_template(
         "map/index.html",
         form=form,

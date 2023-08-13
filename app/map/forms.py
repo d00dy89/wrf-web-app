@@ -11,10 +11,10 @@ class SurfacePlotForm(FlaskForm):
     should_plot_slp = fields.BooleanField(label="Eş Yüzey Basınç Konturları (hPa)", default="checked")
     should_plot_wind = fields.BooleanField(label="10 metre Rüzgar Barbları (m/s)", default="checked")
     colour_fill_data = fields.SelectField(
-        label="Yüzey Değişkeni Seç:",
+        label="Değişken Seç:",
         choices=[
             (Constants.FIELD_KEY_T2, "Sıcaklık 2m"),
-            (Constants.FIELD_KEY_TD2, "Çiğ Noktası 2m"),
+            (Constants.FIELD_KEY_TD2, "Çiy Noktası 2m"),
             (Constants.FIELD_KEY_RH2, "Bağıl Nem 2m"),
             (Constants.FIELD_KEY_WIND_10, "Rüzgar 10m"),
             (Constants.FIELD_KEY_PREC, "Yağış"),

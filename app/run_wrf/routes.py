@@ -163,7 +163,7 @@ def wps():
 
         sleep(.2)
         # link grib
-        downloaded_files = session.pop("downloaded_files")
+        downloaded_files = session["downloaded_files"]
         run_repository.link_grib(downloaded_files)
         run_repository.run_ungrib_exe()
 

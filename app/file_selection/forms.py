@@ -14,7 +14,7 @@ path_config: PathConfig = current_app.config.get("PATH_CONFIG")
 
 class SelectFileForm(FlaskForm):
     selected_file = RadioField(
-        label='Select File',
+        label='WRF çıktıları',
         validators=[DataRequired()]
     )
     selected_file_select_field = SelectField(label="Select File")

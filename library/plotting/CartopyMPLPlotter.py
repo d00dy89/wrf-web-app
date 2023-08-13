@@ -89,7 +89,8 @@ class CartopyMplPlotter:
                                f"{self.data_manager.data.title}"
         self._right_subtitle += f"Valid for: {date} UTC"
 
-    def plot_slp(self, time_step: int = 0, line_color: str = "black"):
+    def plot_contour(self, time_step: int = 0, line_color: str = "black"):
+        # TODO: make it plot any other variable
         slp_var = self.data_manager.get_slp(timeidx=time_step)
 
         slp_min = slp_var.min().data.item()
@@ -126,17 +127,15 @@ class CartopyMplPlotter:
 
     def plot_contour_fill(self, data_key: str, timeidx: int = 0):
         ctf_var: CTFVariable = self.data_manager.get_contour_fill_data(data_key, timeidx=timeidx)
-        self._left_subtitle += f" - {ctf_var.title} {ctf_var.unit_text}"
 
-        # if not ctf_var.data_to_plot.any() > 0:
-        #     return
+        self._left_subtitle += f" - {ctf_var.title} {ctf_var.unit_text}"
 
         ctf_kwargs = ctf_var.cmap.create_cmap()
 
         ctf = self._ax.contourf(
             self.lons, self.lats,
             ctf_var.data_to_plot,
-            levels=ctf_var.levels,
+            # levels=ctf_var.levels,
             transform=self._default_proj_transformer,
             zorder=0,
             **ctf_kwargs,
@@ -145,7 +144,9 @@ class CartopyMplPlotter:
                             orientation="horizontal",
                             ticks=ctf_var.levels,
                             boundaries=ctf_var.levels,
-                            pad=0.03, shrink=0.83)
+                            pad=0.03, shrink=0.83,
+                            extend=ctf_var.cmap.cbar_extend)
+
         cbar.set_label(f"{ctf_var.title} {ctf_var.unit_text}")
 
     @staticmethod
