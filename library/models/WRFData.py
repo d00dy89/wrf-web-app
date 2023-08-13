@@ -149,8 +149,8 @@ class WRFData:
         "RAINSH" "RAINC" "RAINNC"
         :return:
         """
-        rain_sum_now = self.extract_variable("RAINC", timeidx=timeidx) + self.extract_variable("RAINC", timeidx=timeidx)
+        rain_sum_now = self.extract_variable("RAINC", timeidx=timeidx) + self.extract_variable("RAINNC", timeidx=timeidx)
         if timeidx == 0:
             return rain_sum_now
-        rain_sum_prev = self.extract_variable("RAINC", timeidx=timeidx-1) + self.extract_variable("RAINC", timeidx=timeidx-1)
+        rain_sum_prev = self.extract_variable("RAINC", timeidx=timeidx-1) + self.extract_variable("RAINNC", timeidx=timeidx-1)
         return rain_sum_now - rain_sum_prev
