@@ -62,7 +62,7 @@ class WrfOutManager(metaclass=Singleton):
         # TODO: calculate from x, y grid count and dx, dy
         x = self.data.x_grid_count
         y = self.data.y_grid_count
-        return x / 8, y / 8
+        return 13, 13
 
     def get_time_string_by_index(self, timeidx: int = 0, fmt: str = "%Y-%m-%d %H:%M:%S") -> str:
         available_times = self.data.available_times
