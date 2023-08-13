@@ -72,11 +72,11 @@ class DomainForm(FlaskForm):
         "north-south-grid-count", description="Güney - kuzey yönü",
         default=100)
     ref_lat = fields.FloatField(
-        "ref-lat", description="Enlem",
-        default=41)
+        "ref-lat", description="Merkez Enlem", validators=[DataRequired()],
+        default="30-60 arasında olmalıdır.")
     ref_lon = fields.FloatField(
-        "ref-lon", description="Boylam",
-        default=29)
+        "ref-lon", description="Merkez Boylam",
+        default="giriniz.", validators=[DataRequired()])
     true_lat_1 = fields.FloatField(
         "lambert-true-lat-1", description="1. gerçek enlem",
         default=30)
