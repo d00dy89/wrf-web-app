@@ -11,10 +11,13 @@
             <ul>
                 <li>{{ form.should_plot_slp.label}}  {{ form.should_plot_slp() }}</li>
                 {{ render_form_field_errors(form.should_plot_slp) }}
+
                 <li>{{ form.should_plot_wind.label}}  {{ form.should_plot_wind() }}</li>
                 {{ render_form_field_errors(form.should_plot_wind) }}
+
                 <li>{{ form.colour_fill_data.label}}  {{ form.colour_fill_data() }}</li>
                 {{ render_form_field_errors(form.colour_fill_data) }}
+
                 <li>{{ time_form.select_time.label }}  {{ time_form.select_time() }}</li>
                 {{ render_form_field_errors(time_form.select_time) }}
             </ul>

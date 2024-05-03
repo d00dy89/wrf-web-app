@@ -18,7 +18,12 @@ class SurfacePlotForm(FlaskForm):
             (Constants.FIELD_KEY_RH2, "Bağıl Nem 2m"),
             (Constants.FIELD_KEY_WIND_10, "Rüzgar 10m"),
             (Constants.FIELD_KEY_PREC, "Yağış"),
-            (Constants.FIELD_KEY_SNOW, "Kar")
+            (Constants.FIELD_KEY_SNOW, "Kar"),
+            (Constants.FIELD_KEY_GEO500, "500mb Yükseklik ve Rüzgar Hızı"),
+            (Constants.FIELD_KEY_THICKNESS, "1000-500mb Kalınlık"),
+            (Constants.FIELD_KEY_WS300, "300mb Rüzgar Hızı"),
+            (Constants.FIELD_KEY_TEMP850, "850mb Sıcaklık"),
+            (Constants.FIELD_KEY_RH700, "700mb Bağıl Nem"),
         ],
         default=Constants.FIELD_KEY_T2)
 

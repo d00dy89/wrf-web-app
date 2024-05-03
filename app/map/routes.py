@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import render_template, session, url_for, redirect, request, current_app
+from flask import render_template, session, url_for, redirect, current_app
 
 from app import FlaskApp
 from app.file_selection.forms import SelectFileForm
@@ -13,6 +13,7 @@ from library.plotting.CartopyMPLPlotter import CartopyMplPlotter
 
 from app.path_config import PathConfig
 
+import app.map.constants as Constants
 
 current_app: FlaskApp
 path_config: PathConfig = current_app.config.get("PATH_CONFIG")
@@ -40,15 +41,33 @@ def index() -> str:
     )
     selected_time = int(time_form.select_time.data)
     wrf_manager.load_base_variables()
+
     st = datetime.utcnow()
     print('Creating Figure...')
+
     plotter.create_figure()
     plotter.generate_figure_title(timeidx=selected_time)
-    if should_plot_slp:
-        plotter.plot_contour(time_step=selected_time)
 
+    # TODO: provide an interface for contour customization
+    if should_plot_slp and (colour_fill_data is not Constants.FIELD_KEY_SLP):
+        if colour_fill_data == Constants.FIELD_KEY_GEO500:
+            plotter.plot_contour(data_key=colour_fill_data, time_step=selected_time)
+        elif colour_fill_data == Constants.FIELD_KEY_TEMP850:
+            plotter.plot_contour(data_key=colour_fill_data, time_step=selected_time, level=[0], line_color="black", line_style="dashed", line_width=3)
+            plotter.plot_contour(data_key=Constants.FIELD_KEY_RH850, time_step=selected_time, cmap="rainbow_r")
+
+        elif colour_fill_data == Constants.FIELD_KEY_RH700:
+            plotter.plot_contour(data_key=colour_fill_data, time_step=selected_time)
+
+        elif colour_fill_data == Constants.FIELD_KEY_WS300:
+            plotter.plot_contour(data_key=Constants.FIELD_KEY_SLP, time_step=selected_time, line_style="dashed")
+
+        else:
+            plotter.plot_contour(data_key=Constants.FIELD_KEY_SLP, time_step=selected_time)
+
+    # TODO: provide an interface for barb customization
     if should_plot_wind:
-        plotter.plot_wind(time_step=selected_time, grid_interval=5)
+        plotter.plot_wind(wind_variable_key=colour_fill_data, time_step=selected_time, grid_interval=5)
 
     plotter.plot_contour_fill(data_key=colour_fill_data, timeidx=selected_time)
 

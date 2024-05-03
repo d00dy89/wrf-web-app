@@ -10,22 +10,12 @@ import cartopy.crs as ccrs
 
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
+import app.map.constants as Constants
+
 from app.WrfOutManager import WrfOutManager
-from app.map.models import CTFVariable
+from app.map.models import CTFVariable, CTVariable
 
 matplotlib.use('WebAgg')
-
-
-@dataclass
-class PlotKwargs:
-    contour_data: np.ndarray
-    contour_kwargs: dict
-
-    contour_fill_data: np.ndarray
-    contour_fill_kwargs: dict
-
-    quiver_data: np.ndarray = None
-    quiver_kwargs: dict = None
 
 
 class CartopyMplPlotter:
@@ -85,45 +75,80 @@ class CartopyMplPlotter:
 
     def generate_figure_title(self, timeidx: int = 0):
         date = self.data_manager.get_time_string_by_index(timeidx)
-        self._left_subtitle += f" GFS INPUT FROM: {self.data_manager.data.simulation_start_date}\n" \
-                               f"{self.data_manager.data.title}"
-        self._right_subtitle += f"Valid for: {date} UTC"
+        self._left_subtitle += f"{self.data_manager.data.title}\n"
 
-    def plot_contour(self, time_step: int = 0, line_color: str = "black"):
-        # TODO: make it plot any other variable
-        slp_var = self.data_manager.get_slp(timeidx=time_step)
+        self._right_subtitle += f"GFS INPUT FROM: {self.data_manager.data.simulation_start_date}\nValid for: {date} UTC"
 
-        slp_min = slp_var.min().data.item()
-        slp_max = slp_var.max().data.item()
-        slp_start = int(slp_min - 2) if slp_min % 2 == 0 else int(slp_min - 1)
-        slp_end = int(slp_max + 2) if slp_min % 2 == 0 else int(slp_max + 1)
-        levels = np.arange(slp_start, slp_end, 2)
+    def plot_contour(self, data_key: str, time_step: int = 0, level: [int] = None, line_color: str = "black",
+                     line_style: str = "solid", cmap=None, line_width = 2):
+
+        contour_var: CTVariable = self.data_manager.get_contour_data(key=data_key, timeidx=time_step)
+        if contour_var is None:
+            pass
+
+        if level is not None:
+            contour_var.levels = level
+
+        if cmap:
+            line_color = None
+
+        self._left_subtitle += f" - {contour_var.title} {contour_var.unit_text}"
 
         ct = self._ax.contour(
             self.lons, self.lats,
-            slp_var,
-            levels=levels,
+            contour_var.data_to_plot,
+            levels=contour_var.levels,
             linewidths=2, colors=line_color, alpha=0.8,
             transform=self._default_proj_transformer,
             zorder=5,
+            linestyles=line_style,
+            cmap=cmap
         )
         self._ax.clabel(ct, inline=True, fontsize=12)
         return ct
 
     def plot_figure_title(self, additional_msg: str = "", **kwargs):
         self._left_subtitle += additional_msg
-        self._ax.set_title(self._right_subtitle, loc="right")
-        self._ax.set_title(self._left_subtitle, loc="left")
 
-    def plot_wind(self, time_step: int = 0, grid_interval: int = 25):
-        u_wind, v_wind = self.data_manager.get_10m_winds(timeidx=time_step)
-        self._ax.barbs(
-            self.lons[::grid_interval, ::grid_interval],
-            self.lats[::grid_interval, ::grid_interval],
-            u_wind[::grid_interval, ::grid_interval],
-            v_wind[::grid_interval, ::grid_interval],
-            transform=self._default_proj_transformer,
-            length=6, zorder=10)
+        # if self._left_subtitle
+        self._ax.set_title(self._right_subtitle, loc="right", fontdict={"size": 13})
+        self._ax.set_title(self._left_subtitle, loc="left", fontdict={"size": 13})
+
+    def plot_wind(self, wind_variable_key: str, time_step: int = 0, grid_interval: int = 25):
+        u_wind, v_wind = self.data_manager.get_winds(key=wind_variable_key, timeidx=time_step)
+
+        if wind_variable_key == Constants.FIELD_KEY_WS300:
+            self._ax.streamplot(
+                self.lons[::grid_interval, ::grid_interval],
+                self.lats[::grid_interval, ::grid_interval],
+                u_wind[::grid_interval, ::grid_interval],
+                v_wind[::grid_interval, ::grid_interval],
+                transform=self._default_proj_transformer, zorder=10, color="black", arrowsize=1.5, density=[.9, .9])
+
+        elif wind_variable_key == Constants.FIELD_KEY_TEMP850:
+            self._ax.barbs(
+                self.lons[::grid_interval, ::grid_interval],
+                self.lats[::grid_interval, ::grid_interval],
+                u_wind[::grid_interval, ::grid_interval],
+                v_wind[::grid_interval, ::grid_interval],
+                transform=self._default_proj_transformer,
+                length=6, zorder=10)
+        elif wind_variable_key == Constants.FIELD_KEY_RH700:
+            self._ax.barbs(
+                self.lons[::grid_interval, ::grid_interval],
+                self.lats[::grid_interval, ::grid_interval],
+                u_wind[::grid_interval, ::grid_interval],
+                v_wind[::grid_interval, ::grid_interval],
+                transform=self._default_proj_transformer,
+                length=6, zorder=10)
+        else:
+            self._ax.barbs(
+                self.lons[::grid_interval, ::grid_interval],
+                self.lats[::grid_interval, ::grid_interval],
+                u_wind[::grid_interval, ::grid_interval],
+                v_wind[::grid_interval, ::grid_interval],
+                transform=self._default_proj_transformer,
+                length=6, zorder=10)
 
     def plot_contour_fill(self, data_key: str, timeidx: int = 0):
         ctf_var: CTFVariable = self.data_manager.get_contour_fill_data(data_key, timeidx=timeidx)

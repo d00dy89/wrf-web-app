@@ -69,7 +69,7 @@ class WRFData:
     def interpolate_to_pressure_level(self, variable_to_interpolate: xr.DataArray, level_to_interpolate: float,
                                       pressure_units: str = "hPa",
                                       timeidx: int = 0) -> xr.DataArray:
-        _p = self.extract_variable("pressure", units=pressure_units, timeidx=timeidx)
+        _p = self.extract_variable("p", timeidx=timeidx, units=pressure_units)
         return wrf.interplevel(variable_to_interpolate, _p, level_to_interpolate)
 
     def built_in_variables(self) -> dict:
@@ -111,7 +111,8 @@ class WRFData:
 
     def extract_variable(self, var_name: str, *args, **kwargs) -> xr.DataArray:
         # TODO: consider cache
-        return wrf.getvar(wrfin=self.ds, varname=var_name, *args, **kwargs)
+        result = wrf.getvar(wrfin=self.ds, varname=var_name, *args, **kwargs)
+        return result
 
     def extract_variable_to_np(self, *args, **kwargs) -> np.ndarray:
         return wrf.to_np(self.extract_variable(*args, **kwargs))

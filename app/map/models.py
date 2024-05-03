@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 from functools import cached_property
-from typing import List, Union, Dict
+from typing import Dict
 
 import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
 from library.plotting.nclcmaps import get_ncl_cmap, create_ncl_cmap_with_linear_segmentation
@@ -36,7 +35,7 @@ class Cmap:
     @property
     def levels(self):
         if self.type == "uniform":
-            return np.arange(self.vmin, self.vmax, self.interval)
+            return np.arange(self.vmin, self.vmax + 1, self.interval)
         else:
             return self.bounds
 
@@ -59,15 +58,21 @@ class CTVariable:
     var_key: str
     title: str
     unit_text: str
+    plot_interval: int
     data_to_plot: np.ndarray = None
 
-    def calculate_levels(self, interval: int) -> [int]:
+    @cached_property
+    def levels(self):
+        if self.data_to_plot is None:
+            raise Exception("Contour variable does not have data to plot!")
+        return self._calculate_levels(self.plot_interval)
+
+    def _calculate_levels(self, interval: int) -> [int]:
         min_val = self.data_to_plot.min().data.item()
         max_val = self.data_to_plot.max().data.item()
-        range_start = int(min_val - 2) if min_val % 2 == 0 else int(min_val - 1)
-        range_end = int(max_val + 2) if max_val % 2 == 0 else int(max_val + 1)
-        levels = np.arange(range_start, range_end, 2)
-        return levels
+        range_start = int(min_val - interval) if min_val % interval == 0 else int(min_val - 1)
+        range_end = int(max_val + interval) if max_val % interval == 0 else int(max_val + 1)
+        return np.arange(range_start, range_end, interval)
 
 
 @dataclass
